@@ -13,28 +13,30 @@
 class CPlayer : public CGameObject
 {
 protected:
-	XMFLOAT3					m_xmf3Position;
-	XMFLOAT3					m_xmf3Right;
-	XMFLOAT3					m_xmf3Up;
-	XMFLOAT3					m_xmf3Look;
+	XMFLOAT3					m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	XMFLOAT3					m_xmf3Right = XMFLOAT3(1.0f, 0.0f, 0.0f);
+	XMFLOAT3					m_xmf3Up = XMFLOAT3(0.0f, 1.0f, 0.0f);
+	XMFLOAT3					m_xmf3Look = XMFLOAT3(0.0f, 0.0f, 1.0f);
 
-	float           			m_fPitch;
-	float           			m_fYaw;
-	float           			m_fRoll;
+	XMFLOAT3					m_xmf3Velocity = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	XMFLOAT3     				m_xmf3Gravity = XMFLOAT3(0.0f, 0.0f, 0.0f);
 
-	XMFLOAT3					m_xmf3Velocity;
-	XMFLOAT3     				m_xmf3Gravity;
-	float           			m_fMaxVelocityXZ;
-	float           			m_fMaxVelocityY;
-	float           			m_fFriction;
+	float           			m_fPitch = 0.0f;
+	float           			m_fYaw = 0.0f;
+	float           			m_fRoll = 0.0f;
 
-	LPVOID						m_pPlayerUpdatedContext;
-	LPVOID						m_pCameraUpdatedContext;
+	float           			m_fMaxVelocityXZ = 0.0f;
+	float           			m_fMaxVelocityY = 0.0f;
+	float           			m_fFriction = 0.0f;
+
+	LPVOID						m_pPlayerUpdatedContext = NULL;
+	LPVOID						m_pCameraUpdatedContext = NULL;
 
 	CCamera						*m_pCamera = NULL;
 
 public:
-	CPlayer();
+	CPlayer() { }
+	CPlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, void *pContext=NULL);
 	virtual ~CPlayer();
 
 	XMFLOAT3 GetPosition() { return(m_xmf3Position); }
@@ -84,19 +86,11 @@ public:
 class CAirplanePlayer : public CPlayer
 {
 public:
-	CAirplanePlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature);
+	CAirplanePlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, void *pContext=NULL);
 	virtual ~CAirplanePlayer();
 
-	CGameObject*				m_pMainRotorFrame = NULL;
-	CGameObject*				m_pTailRotorFrame = NULL;
-
-private:
-	virtual void OnInitialize();
-	virtual void Animate(float fTimeElapsed, XMFLOAT4X4 *pxmf4x4Parent = NULL);
-
-public:
 	virtual CCamera *ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed);
 	virtual void OnPrepareRender();
+	virtual void ReleaseShaderVariables();
 };
-
 
