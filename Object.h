@@ -225,6 +225,17 @@ public:
 	virtual void Animate(float fTimeElapsed, XMFLOAT4X4 *pxmf4x4Parent=NULL);
 };
 
+class CTerrainObject : public CGameObject
+{
+public:
+	CTerrainObject();
+	virtual ~CTerrainObject();
+
+public:
+	virtual void OnInitialize();
+	virtual void Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
+};
+
 class CHellicopterObject : public CGameObject
 {
 public:

@@ -126,13 +126,13 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	m_ppGameObjects[4] = pMi24Object;
 
 	CGameObject* pTerrainModel = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Terrain.bin");
-	//pMi24Object = NULL;
+	CTerrainObject* pTerrainObject = NULL;
 
-	pMi24Object = new CMi24Object();
-	pMi24Object->SetChild(pTerrainModel, true);
-	pMi24Object->OnInitialize();
-	pMi24Object->SetPosition(0.0f, 0.0f, 0.0f);
-	m_ppGameObjects[5] = pMi24Object;
+	pTerrainObject = new CTerrainObject();
+	pTerrainObject->SetChild(pTerrainModel, true);
+	pTerrainObject->OnInitialize();
+	pTerrainObject->SetPosition(0.0f, 0.0f, 0.0f);
+	m_ppGameObjects[5] = pTerrainObject;
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }

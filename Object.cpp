@@ -704,6 +704,25 @@ void CHellicopterObject::Animate(float fTimeElapsed, XMFLOAT4X4 *pxmf4x4Parent)
 
 	CGameObject::Animate(fTimeElapsed, pxmf4x4Parent);
 }
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+
+CTerrainObject::CTerrainObject()
+{
+}
+
+CTerrainObject::~CTerrainObject()
+{
+}
+
+void CTerrainObject::OnInitialize()
+{
+}
+
+void CTerrainObject::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
+{
+	CGameObject::Animate(fTimeElapsed, pxmf4x4Parent);
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
