@@ -70,7 +70,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 
 	BuildDefaultLightsAndMaterials();
 
-	m_nGameObjects = 5;
+	m_nGameObjects = 6;
 	m_ppGameObjects = new CGameObject*[m_nGameObjects];
 
 	CGameObject *pApacheModel = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Apache.bin");
@@ -124,6 +124,15 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	pMi24Object->SetScale(4.5f, 4.5f, 4.5f);
 	pMi24Object->Rotate(0.0f, -90.0f, 0.0f);
 	m_ppGameObjects[4] = pMi24Object;
+
+	CGameObject* pTerrainModel = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Terrain.bin");
+	//pMi24Object = NULL;
+
+	pMi24Object = new CMi24Object();
+	pMi24Object->SetChild(pTerrainModel, true);
+	pMi24Object->OnInitialize();
+	pMi24Object->SetPosition(0.0f, 0.0f, 0.0f);
+	m_ppGameObjects[5] = pMi24Object;
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
