@@ -70,10 +70,10 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 
 	BuildDefaultLightsAndMaterials();
 
-	m_nGameObjects = 0;
+	m_nGameObjects = 1;
 	m_ppGameObjects = new CGameObject*[m_nGameObjects];
 
-	/*CGameObject *pApacheModel = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Apache.bin");
+	CGameObject *pApacheModel = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Apache.bin");
 	CApacheObject* pApacheObject = NULL;
 
 	pApacheObject = new CApacheObject();
@@ -84,7 +84,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	pApacheObject->Rotate(0.0f, 90.0f, 0.0f);
 	m_ppGameObjects[0] = pApacheObject;
 
-	pApacheObject = new CApacheObject();
+	/*pApacheObject = new CApacheObject();
 	pApacheObject->SetChild(pApacheModel, true);
 	pApacheObject->OnInitialize();
 	pApacheObject->SetPosition(-75.0f, 0.0f, 80.0f);
