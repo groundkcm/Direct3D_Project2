@@ -70,8 +70,19 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 
 	BuildDefaultLightsAndMaterials();
 
-	m_nGameObjects = 1;
+	m_nGameObjects = 2;
 	m_ppGameObjects = new CGameObject*[m_nGameObjects];
+
+	CGameObject* pPlaneModel = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/B_Plane.bin");
+	CApacheObject* pPlaneObject = NULL;
+
+	pPlaneObject = new CApacheObject();
+	pPlaneObject->SetChild(pPlaneModel, true);
+	pPlaneObject->OnInitialize();
+	pPlaneObject->SetPosition(0.0f, -100.0f, 0.0f);
+	pPlaneObject->SetScale(100.0f, 100.0f, 100.0f);
+	pPlaneObject->Rotate(0.0f, 0.0f, 0.0f);
+	m_ppGameObjects[0] = pPlaneObject;
 
 	CGameObject *pApacheModel = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Apache.bin");
 	CApacheObject* pApacheObject = NULL;
@@ -82,7 +93,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	pApacheObject->SetPosition(+130.0f, 0.0f, 160.0f);
 	pApacheObject->SetScale(1.5f, 1.5f, 1.5f);
 	pApacheObject->Rotate(0.0f, 90.0f, 0.0f);
-	m_ppGameObjects[0] = pApacheObject;
+	m_ppGameObjects[1] = pApacheObject;
 
 	/*pApacheObject = new CApacheObject();
 	pApacheObject->SetChild(pApacheModel, true);
