@@ -266,6 +266,31 @@ bool CScene::ProcessInput(UCHAR *pKeysBuffer)
 	return(false);
 }
 
+void CScene::Collision()
+{
+	m_pPlayer->m_xmOOBB = BoundingOrientedBox(XMFLOAT3(m_pPlayer->GetPosition()), XMFLOAT3(100.0f, 100.0f, 100.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
+	m_pPlayer->m_pObjectCollided = NULL;
+
+	for (int i = 0; i < m_nGameObjects; ++i) {
+		m_ppGameObjects[i]->m_xmOOBB = BoundingOrientedBox(XMFLOAT3(m_ppGameObjects[i]->GetPosition()), XMFLOAT3(100.0f, 100.0f, 100.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
+		m_ppGameObjects[i]->m_pObjectCollided = NULL;
+	}
+
+	for (int i = 0; i < m_nGameObjects; ++i) {
+		if (m_ppGameObjects[i]->m_xmOOBB.Intersects(m_pPlayer->m_xmOOBB)) {
+			m_pPlayer->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
+		}
+		for (int j = (i + 1); j < m_nGameObjects; j++)
+		{
+			if (m_ppGameObjects[i]->m_xmOOBB.Intersects(m_ppGameObjects[j]->m_xmOOBB))
+			{
+				m_ppGameObjects[i]->m_pObjectCollided = m_ppGameObjects[j];
+				m_ppGameObjects[j]->m_pObjectCollided = m_ppGameObjects[i];
+			}
+		}
+	}
+}
+
 void CScene::AnimateObjects(float fTimeElapsed)
 {
 	m_fElapsedTime = fTimeElapsed;

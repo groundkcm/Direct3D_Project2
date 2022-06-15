@@ -133,6 +133,10 @@ public:
 	CGameObject 					*m_pChild = NULL;
 	CGameObject 					*m_pSibling = NULL;
 
+	BoundingOrientedBox				m_xmOOBB = BoundingOrientedBox();		// 바운딩 박스
+	CGameObject*					m_pObjectCollided = NULL;
+	bool							m_pPlayerCollided = false;
+
 	void SetMesh(CMesh *pMesh);
 	void SetShader(CShader *pShader);
 	void SetShader(int nMaterial, CShader *pShader);
