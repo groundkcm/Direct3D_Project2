@@ -4,6 +4,8 @@
 
 #include "stdafx.h"
 #include "GameFramework.h"
+#include "Scene.h"
+#include "Player.h"
 
 CGameFramework::CGameFramework()
 {
@@ -11,12 +13,19 @@ CGameFramework::CGameFramework()
 	m_pdxgiSwapChain = NULL;
 	m_pd3dDevice = NULL;
 
+	m_pd3dCommandAllocator = NULL;
+	m_pd3dCommandQueue = NULL;
+	m_pd3dPipelineState = NULL;
+	m_pd3dCommandList = NULL;
+
 	for (int i = 0; i < m_nSwapChainBuffers; i++) m_ppd3dSwapChainBackBuffers[i] = NULL;
 	m_nSwapChainBufferIndex = 0;
 
 	m_pd3dCommandAllocator = NULL;
 	m_pd3dCommandQueue = NULL;
 	m_pd3dCommandList = NULL;
+
+	m_pd3dDepthStencilBuffer = NULL;
 
 	m_pd3dRtvDescriptorHeap = NULL;
 	m_pd3dDsvDescriptorHeap = NULL;
@@ -26,6 +35,7 @@ CGameFramework::CGameFramework()
 
 	m_hFenceEvent = NULL;
 	m_pd3dFence = NULL;
+	m_nFenceValue = 0;
 	for (int i = 0; i < m_nSwapChainBuffers; i++) m_nFenceValues[i] = 0;
 
 	m_nWndClientWidth = FRAME_BUFFER_WIDTH;
@@ -51,6 +61,8 @@ bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hMainWnd)
 	CreateRtvAndDsvDescriptorHeaps();
 	CreateSwapChain();
 	CreateDepthStencilView();
+
+	m_hFenceEvent = ::CreateEvent(NULL, FALSE, FALSE, NULL);
 
 	BuildObjects();
 
@@ -287,6 +299,7 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 	{
 		case WM_LBUTTONDOWN:
 		case WM_RBUTTONDOWN:
+			//m_pSelectedObject = m_pScene->PickObjectPointedByCursor(LOWORD(lParam), HIWORD(lParam), m_pCamera);
 			::SetCapture(hWnd);
 			::GetCursorPos(&m_ptOldCursorPos);
 			break;
@@ -386,6 +399,7 @@ void CGameFramework::OnDestroy()
 	if (m_pdxgiFactory) m_pdxgiFactory->Release();
 
 #if defined(_DEBUG)
+	if (m_pd3dDebugController) m_pd3dDebugController->Release();
 	IDXGIDebug1	*pdxgiDebug = NULL;
 	DXGIGetDebugInterface1(0, __uuidof(IDXGIDebug1), (void **)&pdxgiDebug);
 	HRESULT hResult = pdxgiDebug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_DETAIL);
@@ -400,11 +414,16 @@ void CGameFramework::BuildObjects()
 	m_pScene = new CScene();
 	if (m_pScene) m_pScene->BuildObjects(m_pd3dDevice, m_pd3dCommandList);
 
+	/*m_pPlayer = new CTerrainPlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature(), m_pScene->GetTerrain(), 1);
+
+	m_pCamera = m_pPlayer->GetCamera();*/
+
+	//
 	CAirplanePlayer *pAirplanePlayer = new CAirplanePlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature());
 	pAirplanePlayer->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
 	m_pScene->m_pPlayer = m_pPlayer = pAirplanePlayer;
 	m_pCamera = m_pPlayer->GetCamera();
-
+	//
 	m_pd3dCommandList->Close();
 	ID3D12CommandList *ppd3dCommandLists[] = { m_pd3dCommandList };
 	m_pd3dCommandQueue->ExecuteCommandLists(1, ppd3dCommandLists);
@@ -453,18 +472,87 @@ void CGameFramework::ProcessInput()
 
 		if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f))
 		{
-			if (cxDelta || cyDelta)
+			if (m_pSelectedObject)
 			{
-				if (pKeysBuffer[VK_RBUTTON] & 0xF0)
-					m_pPlayer->Rotate(cyDelta, 0.0f, -cxDelta);
-				else
-					m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
+				ProcessSelectedObject(dwDirection, cxDelta, cyDelta);
 			}
-			if (dwDirection) m_pPlayer->Move(dwDirection, 10.0f, true);
+			else {
+				if (cxDelta || cyDelta)
+				{
+					if (pKeysBuffer[VK_RBUTTON] & 0xF0)
+						m_pPlayer->Rotate(cyDelta, 0.0f, -cxDelta);
+					else
+						m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
+				}
+				if (dwDirection) m_pPlayer->Move(dwDirection, 50.0f * m_GameTimer.GetTimeElapsed(), true);
+			}
 		}
 	}
 	m_pPlayer->Update(m_GameTimer.GetTimeElapsed());
 }
+
+void CGameFramework::ProcessSelectedObject(DWORD dwDirection, float cxDelta, float cyDelta) 
+{
+	if (dwDirection != 0)
+	{
+		if (dwDirection & DIR_FORWARD)
+			m_pSelectedObject->MoveForward(+1.0f);
+		if (dwDirection & DIR_BACKWARD)
+			m_pSelectedObject->MoveForward(-1.0f);
+		if (dwDirection & DIR_LEFT)
+			m_pSelectedObject->MoveStrafe(+1.0f);
+		if (dwDirection & DIR_RIGHT)
+			m_pSelectedObject->MoveStrafe(-1.0f);
+		if (dwDirection & DIR_UP)
+			m_pSelectedObject->MoveUp(+1.0f);
+		if (dwDirection & DIR_DOWN)
+			m_pSelectedObject->MoveUp(-1.0f);
+	}
+	else if ((cxDelta != 0.0f) || (cyDelta != 0.0f))
+	{
+		m_pSelectedObject->Rotate(cyDelta, cxDelta, 0.0f);
+	}
+}
+
+void CGameFramework::OnResizeBackBuffers()
+{
+	WaitForGpuComplete();	// 백버퍼는 윈도우 사이즈 , 풀스크린으로 되어있기 떄문에 GPU가 모든 그림을 다 그릴 때 까지 기다린다.
+
+	m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);	// CommandList를 비우고 재사용 할거야
+
+	/* 혹시 랜더타겟 버퍼가 남아있다면 메모리를 해제한다. */
+	for (int i = 0; i < m_nSwapChainBuffers; i++)
+		if (m_ppd3dSwapChainBackBuffers[i])
+			m_ppd3dSwapChainBackBuffers[i]->Release();
+
+	if (m_pd3dDepthStencilBuffer)
+		m_pd3dDepthStencilBuffer->Release();
+
+#ifdef _WITH_ONLY_RESIZE_BACKBUFFERS
+	DXGI_SWAP_CHAIN_DESC dxgiSwapChainDesc;
+	m_pdxgiSwapChain->GetDesc(&dxgiSwapChainDesc);
+	m_pdxgiSwapChain->ResizeBuffers(0, 0, 0, DXGI_FORMAT_UNKNOWN, 0);
+	m_nSwapChainBufferIndex = 0;
+#else
+	DXGI_SWAP_CHAIN_DESC dxgiSwapChainDesc;
+	m_pdxgiSwapChain->GetDesc(&dxgiSwapChainDesc);
+	m_pdxgiSwapChain->ResizeBuffers(m_nSwapChainBuffers, m_nWndClientWidth,
+		m_nWndClientHeight, dxgiSwapChainDesc.BufferDesc.Format, dxgiSwapChainDesc.Flags);
+#endif
+
+	CreateRenderTargetViews();
+	CreateDepthStencilView();
+
+	m_pd3dCommandList->Close();
+
+	/* 여기서 만든 커맨드 들을 리스트화 시킨다. */
+	ID3D12CommandList* ppd3dCommandLists[] = { m_pd3dCommandList };
+	m_pd3dCommandQueue->ExecuteCommandLists(1, ppd3dCommandLists);
+
+	/* 화면 전환이 이루어져서 다시 그리는걸 기다린다. */
+	WaitForGpuComplete();
+}
+
 
 void CGameFramework::AnimateObjects()
 {

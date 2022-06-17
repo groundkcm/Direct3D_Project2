@@ -7,6 +7,12 @@
 #include "Player.h"
 #include "Scene.h"
 
+class CScene;
+class CGameTimer;
+class CGameObject;
+class CPlayer;
+class CCamera;
+
 class CGameFramework
 {
 public:
@@ -37,13 +43,16 @@ public:
 	void WaitForGpuComplete();
 	void MoveToNextFrame();
 
+	void OnResizeBackBuffers();
+	void ProcessSelectedObject(DWORD dwDirection, float cxDelta, float cyDelta);
+
 	void OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 	void OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 	LRESULT CALLBACK OnProcessingWindowMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 
 private:
-	HINSTANCE					m_hInstance;
-	HWND						m_hWnd; 
+	HINSTANCE					m_hInstance = NULL;
+	HWND						m_hWnd = NULL;
 
 	int							m_nWndClientWidth;
 	int							m_nWndClientHeight;
@@ -74,10 +83,12 @@ private:
 	UINT64						m_nFenceValues[m_nSwapChainBuffers];
 	HANDLE						m_hFenceEvent;
 
+	UINT64						m_nFenceValue;
+
 #if defined(_DEBUG)
 	ID3D12Debug					*m_pd3dDebugController;
 #endif
-
+	ID3D12PipelineState			*m_pd3dPipelineState;
 	CGameTimer					m_GameTimer;
 
 	CScene						*m_pScene = NULL;
@@ -85,6 +96,7 @@ private:
 	CCamera						*m_pCamera = NULL;
 
 	POINT						m_ptOldCursorPos;
+	CGameObject					*m_pSelectedObject = NULL;
 
 	_TCHAR						m_pszFrameRate[70];
 };
