@@ -9,6 +9,7 @@
 
 #include "Object.h"
 #include "Camera.h"
+#include "Shader.h"
 
 class CPlayer : public CGameObject
 {
@@ -34,6 +35,7 @@ protected:
 	CCamera						*m_pCamera = NULL;
 
 public:
+	//CPlayer(int nMeshes = 1);
 	CPlayer();
 	virtual ~CPlayer();
 
@@ -57,7 +59,7 @@ public:
 	CCamera *GetCamera() { return(m_pCamera); }
 	void SetCamera(CCamera *pCamera) { m_pCamera = pCamera; }
 
-	void Move(ULONG nDirection, float fDistance, bool bVelocity = false);
+	void Move(DWORD nDirection, float fDistance, bool bVelocity = false);
 	void Move(const XMFLOAT3& xmf3Shift, bool bVelocity = false);
 	void Move(float fxOffset = 0.0f, float fyOffset = 0.0f, float fzOffset = 0.0f);
 	void Rotate(float x, float y, float z);
@@ -99,4 +101,16 @@ public:
 	virtual void OnPrepareRender();
 };
 
+
+class CTerrainPlayer : public CPlayer {
+
+public:
+	CTerrainPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext, int nMeshes = 1);
+	virtual ~CTerrainPlayer();
+
+	virtual CCamera* ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed);
+	virtual void OnPlayerUpdateCallback(float fTimeElapsed);
+	virtual void OnCameraUpdateCallback(float fTimeElapsed);
+
+};
 
