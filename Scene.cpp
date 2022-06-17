@@ -90,9 +90,9 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	pApacheObject = new CApacheObject();
 	pApacheObject->SetChild(pApacheModel, true);
 	pApacheObject->OnInitialize();
-	pApacheObject->SetPosition(+130.0f, 0.0f, 160.0f);
+	pApacheObject->SetPosition(0.0f, 0.0f, 160.0f);
 	pApacheObject->SetScale(1.5f, 1.5f, 1.5f);
-	pApacheObject->Rotate(0.0f, 90.0f, 0.0f);
+	pApacheObject->Rotate(0.0f, 180.0f, 0.0f);
 	m_ppGameObjects[1] = pApacheObject;
 
 	/*pApacheObject = new CApacheObject();
@@ -268,11 +268,11 @@ bool CScene::ProcessInput(UCHAR *pKeysBuffer)
 
 void CScene::Collision()
 {
-	m_pPlayer->m_xmOOBB = BoundingOrientedBox(XMFLOAT3(m_pPlayer->GetPosition()), XMFLOAT3(35.0f, 40.0f, 60.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
+	m_pPlayer->m_xmOOBB = BoundingOrientedBox(XMFLOAT3(m_pPlayer->GetPosition()), XMFLOAT3(35.0f, 40.0f, 40.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
 	m_pPlayer->m_pObjectCollided = NULL;
 
 	for (int i = 0; i < m_nGameObjects; ++i) {
-		m_ppGameObjects[i]->m_xmOOBB = BoundingOrientedBox(XMFLOAT3(m_ppGameObjects[i]->GetPosition()), XMFLOAT3(35.0f, 40.0f, 60.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
+		m_ppGameObjects[i]->m_xmOOBB = BoundingOrientedBox(XMFLOAT3(m_ppGameObjects[i]->GetPosition()), XMFLOAT3(35.0f, 40.0f, 40.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
 		m_ppGameObjects[i]->m_pObjectCollided = NULL;
 	}
 
