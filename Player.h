@@ -35,8 +35,7 @@ protected:
 	CCamera						*m_pCamera = NULL;
 
 public:
-	//CPlayer(int nMeshes = 1);
-	CPlayer();
+	CPlayer(int nMeshes = 1);
 	virtual ~CPlayer();
 
 	XMFLOAT3 GetPosition() { return(m_xmf3Position); }

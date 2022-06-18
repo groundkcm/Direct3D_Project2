@@ -9,8 +9,7 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // CPlayer
 
-//CPlayer::CPlayer(int nMeshes) : CGameObject(nMeshes)
-CPlayer::CPlayer()
+CPlayer::CPlayer(int nMeshes) : CGameObject(nMeshes)
 {
 	m_pCamera = NULL;
 
