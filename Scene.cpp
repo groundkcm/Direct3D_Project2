@@ -4,6 +4,11 @@
 
 #include "stdafx.h"
 #include "Scene.h"
+#include "Camera.h"
+#include "Timer.h"
+#include "Shader.h"
+#include "Mesh.h"
+#include "Object.h"
 
 CScene::CScene()
 {
@@ -71,8 +76,6 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	//???
 	CMaterial::PrepareShaders(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 
-	BuildDefaultLightsAndMaterials();
-
 
 #ifdef _WITH_TERRAIN_PARTITION 
 	/*
@@ -80,15 +83,43 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	지형 전체는 가로 방향으로 16개, 세로 방향으로 16의 격자 메 쉬를 가진다.
 	지형을 구성하는 격자 메쉬의 개수는 총 256(16x16)개가 된다.
 	*/
-	m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("../Assets/Image/Terrain/HeightMap.raw"), 257, 257, 17, 17, xmf3Scale, xmf4Color);
+	m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("/Model/HeightMap.raw"), 257, 257, 17, 17, xmf3Scale, xmf4Color);
 #else
 	//지형을 하나의 격자 메쉬(257x257)로 생성한다. 
-	m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("../Assets/Image/Terrain/HeightMap.raw"), 257, 257, 257, 257, xmf3Scale, xmf4Color);
+	m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("/Model/HeightMap.raw"), 257, 257, 257, 257, xmf3Scale, xmf4Color);
 #endif
 	m_nShaders = 1;
 	m_pShaders = new CObjectsShader[m_nShaders]
 		; m_pShaders[0].CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 	m_pShaders[0].BuildObjects(pd3dDevice, pd3dCommandList, m_pTerrain);
+
+
+	BuildDefaultLightsAndMaterials();
+
+	m_nGameObjects = 2;
+	m_ppGameObjects = new CGameObject * [m_nGameObjects];
+
+	CGameObject* pPlaneModel = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/B_Plane.bin");
+	CApacheObject* pPlaneObject = NULL;
+
+	pPlaneObject = new CApacheObject();
+	pPlaneObject->SetChild(pPlaneModel, true);
+	pPlaneObject->OnInitialize();
+	pPlaneObject->SetPosition(0.0f, -100.0f, 0.0f);
+	pPlaneObject->SetScale(100.0f, 100.0f, 100.0f);
+	pPlaneObject->Rotate(0.0f, 0.0f, 0.0f);
+	m_ppGameObjects[0] = pPlaneObject;
+
+	CGameObject* pApacheModel = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Apache.bin");
+	CApacheObject* pApacheObject = NULL;
+
+	pApacheObject = new CApacheObject();
+	pApacheObject->SetChild(pApacheModel, true);
+	pApacheObject->OnInitialize();
+	pApacheObject->SetPosition(0.0f, 0.0f, 160.0f);
+	pApacheObject->SetScale(1.5f, 1.5f, 1.5f);
+	pApacheObject->Rotate(0.0f, 180.0f, 0.0f);
+	m_ppGameObjects[1] = pApacheObject;
 
 	//???
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
@@ -98,6 +129,18 @@ void CScene::ReleaseObjects()
 {
 	if (m_pd3dGraphicsRootSignature) m_pd3dGraphicsRootSignature->Release();
 
+	if (m_ppGameObjects)
+	{
+		for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->Release();
+		delete[] m_ppGameObjects;
+	}
+
+	//ReleaseShaderVariables();
+
+	if (m_pLights) delete[] m_pLights;
+	if (m_pTerrain)
+		delete m_pTerrain;
+
 	for (int i = 0; i < m_nShaders; i++) {
 		m_pShaders[i].ReleaseShaderVariables();
 		m_pShaders[i].ReleaseObjects();
@@ -106,18 +149,7 @@ void CScene::ReleaseObjects()
 	if (m_pShaders)
 		delete[] m_pShaders;
 
-	if (m_pTerrain)
-		delete m_pTerrain;
 
-	if (m_ppGameObjects)
-	{
-		for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->Release();
-		delete[] m_ppGameObjects;
-	}
-
-	ReleaseShaderVariables();
-
-	if (m_pLights) delete[] m_pLights;
 }
 
 ID3D12RootSignature *CScene::CreateGraphicsRootSignature(ID3D12Device *pd3dDevice)
@@ -188,11 +220,9 @@ void CScene::ReleaseShaderVariables()
 void CScene::ReleaseUploadBuffers()
 {
 	for (int i = 0; i < m_nGameObjects; i++) m_ppGameObjects[i]->ReleaseUploadBuffers();
-	for (int i = 0; i < m_nShaders; i++)
-		m_pShaders[i].ReleaseUploadBuffers();
+	for (int i = 0; i < m_nShaders; i++) m_pShaders[i].ReleaseUploadBuffers();
 
-	if (m_pTerrain)
-		m_pTerrain->ReleaseUploadBuffers();
+	if (m_pTerrain) m_pTerrain->ReleaseUploadBuffers();
 }
 
 bool CScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
@@ -230,28 +260,28 @@ bool CScene::ProcessInput(UCHAR *pKeysBuffer)
 
 void CScene::Collision()
 {
-	//shader[i]로 변경?
-	m_pPlayer->m_xmOOBB = BoundingOrientedBox(XMFLOAT3(m_pPlayer->GetPosition()), XMFLOAT3(35.0f, 40.0f, 40.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
-	m_pPlayer->m_pObjectCollided = NULL;
+	////shader[i]로 변경?
+	//m_pPlayer->m_xmOOBB = BoundingOrientedBox(XMFLOAT3(m_pPlayer->GetPosition()), XMFLOAT3(35.0f, 40.0f, 40.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
+	//m_pPlayer->m_pObjectCollided = NULL;
 
-	for (int i = 0; i < m_nGameObjects; ++i) {
-		m_ppGameObjects[i]->m_xmOOBB = BoundingOrientedBox(XMFLOAT3(m_ppGameObjects[i]->GetPosition()), XMFLOAT3(35.0f, 40.0f, 40.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
-		m_ppGameObjects[i]->m_pObjectCollided = NULL;
-	}
+	//for (int i = 0; i < m_nGameObjects; ++i) {
+	//	m_ppGameObjects[i]->m_xmOOBB = BoundingOrientedBox(XMFLOAT3(m_ppGameObjects[i]->GetPosition()), XMFLOAT3(35.0f, 40.0f, 40.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
+	//	m_ppGameObjects[i]->m_pObjectCollided = NULL;
+	//}
 
-	for (int i = 0; i < m_nGameObjects; ++i) {
-		if (m_ppGameObjects[i]->m_xmOOBB.Intersects(m_pPlayer->m_xmOOBB)) {
-			m_pPlayer->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
-		}
-		for (int j = (i + 1); j < m_nGameObjects; j++)
-		{
-			if (m_ppGameObjects[i]->m_xmOOBB.Intersects(m_ppGameObjects[j]->m_xmOOBB))
-			{
-				m_ppGameObjects[i]->m_pObjectCollided = m_ppGameObjects[j];
-				m_ppGameObjects[j]->m_pObjectCollided = m_ppGameObjects[i];
-			}
-		}
-	}
+	//for (int i = 0; i < m_nGameObjects; ++i) {
+	//	if (m_ppGameObjects[i]->m_xmOOBB.Intersects(m_pPlayer->m_xmOOBB)) {
+	//		m_pPlayer->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
+	//	}
+	//	for (int j = (i + 1); j < m_nGameObjects; j++)
+	//	{
+	//		if (m_ppGameObjects[i]->m_xmOOBB.Intersects(m_ppGameObjects[j]->m_xmOOBB))
+	//		{
+	//			m_ppGameObjects[i]->m_pObjectCollided = m_ppGameObjects[j];
+	//			m_ppGameObjects[j]->m_pObjectCollided = m_ppGameObjects[i];
+	//		}
+	//	}
+	//}
 }
 
 void CScene::AnimateObjects(float fTimeElapsed)
@@ -259,10 +289,7 @@ void CScene::AnimateObjects(float fTimeElapsed)
 	m_fElapsedTime = fTimeElapsed;
 
 	for (int i = 0; i < m_nGameObjects; i++) m_ppGameObjects[i]->Animate(fTimeElapsed, NULL);
-	for (int i = 0; i < m_nShaders; i++)
-	{
-		m_pShaders[i].AnimateObjects(fTimeElapsed);
-	}
+	for (int i = 0; i < m_nShaders; i++) m_pShaders[i].AnimateObjects(fTimeElapsed);
 
 	if (m_pLights)
 	{
@@ -279,6 +306,13 @@ void CScene::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera
 
 	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
 	pCamera->UpdateShaderVariables(pd3dCommandList);
+
+	if (m_pTerrain) m_pTerrain->Render(pd3dCommandList, pCamera);
+
+	for (int i = 0; i < m_nShaders; i++)
+	{
+		m_pShaders[i].Render(pd3dCommandList, pCamera);
+	}
 
 	UpdateShaderVariables(pd3dCommandList);
 
@@ -332,4 +366,3 @@ CGameObject* CScene::PickObjectPointedByCursor(int xClient, int yClient, CCamera
 	return(pNearestObject);
 
 }
-

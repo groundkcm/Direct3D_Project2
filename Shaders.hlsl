@@ -30,6 +30,7 @@ struct VS_LIGHTING_INPUT
 {
 	float3 position : POSITION;
 	float3 normal : NORMAL;
+	float4 color : COLOR;
 };
 
 struct VS_LIGHTING_OUTPUT
@@ -51,7 +52,7 @@ VS_LIGHTING_OUTPUT VSLighting(VS_LIGHTING_INPUT input)
 	output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
 #ifdef _WITH_VERTEX_LIGHTING
 	output.normalW = normalize(output.normalW);
-	output.color = Lighting(output.positionW, output.normalW);
+	output.color = input.color + Lighting(output.positionW, output.normalW);
 #endif
 	return(output);
 }
