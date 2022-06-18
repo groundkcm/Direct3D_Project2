@@ -147,6 +147,7 @@ public:
 	virtual ~CTerrainPlayer();
 		
 	virtual CCamera *ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed);
+	virtual void OnPrepareRender();
 	virtual void OnPlayerUpdateCallback(float fTimeElapsed); 
 	virtual void OnCameraUpdateCallback(float fTimeElapsed);
 

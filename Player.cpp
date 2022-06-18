@@ -472,12 +472,13 @@ CCamera *CAirplanePlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 CTerrainPlayer::CTerrainPlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, void *pContext, int nMeshes) : CPlayer(nMeshes) {
 	
 	m_pCamera = ChangeCamera(THIRD_PERSON_CAMERA, 0.0f);
-	
+	CTerrainPlayer::OnPrepareRender();
+
 	CHeightMapTerrain *pTerrain = (CHeightMapTerrain *)pContext;
 	//플레이어의 위치를 지형의 가운데(y-축 좌표는 지형의 높이보다 1500 높게)로 설정한다. 
 	//플레이어 위치 벡터의 y좌표가 지형의 높이보다 크고 중력이 작용하도록 플레이어를 설정하였으므로 플레이어는 점차적으로 하강하게 된다. 
 	float fHeight = pTerrain->GetHeight(pTerrain->GetWidth()*0.5f, pTerrain->GetLength()*0.5f); 
-	SetPosition(XMFLOAT3(pTerrain->GetWidth()*0.5f, fHeight + 1500.0f, pTerrain->GetLength()*0.5f)); 
+	SetPosition(XMFLOAT3(pTerrain->GetWidth()*0.5f, fHeight + 200.0f, pTerrain->GetLength()*0.5f)); 
 	
 	//플레이어의 위치가 변경될 때 지형의 정보에 따라 플레이어의 위치를 변경할 수 있도록 설정한다.
 	SetPlayerUpdatedContext(pTerrain); 
@@ -485,13 +486,13 @@ CTerrainPlayer::CTerrainPlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandLi
 	//카메라의 위치가 변경될 때 지형의 정보에 따라 카메라의 위치를 변경할 수 있도록 설정한다. 
 	SetCameraUpdatedContext(pTerrain);
 
-	//CMesh* pAirplaneMesh = new CAirplaneMeshDiffused(pd3dDevice, pd3dCommandList, 20.0f, 20.0f, 4.0f, XMFLOAT4(0.5f, 0.0f, 0.0f, 0.0f));
+	CMesh* pAirplaneMesh = new CAirplaneMeshDiffused(pd3dDevice, pd3dCommandList, 20.0f, 20.0f, 4.0f, XMFLOAT4(0.5f, 0.0f, 0.0f, 0.0f));
 
-	//SetMesh(0, pAirplaneMesh); 
+	SetMesh(0, pAirplaneMesh); 
 	//m_pCamera = ChangeCamera(SPACESHIP_CAMERA/*THIRD_PERSON_CAMERA*/, 0.0f);
 
-	CCubeMeshDiffused *pCubeMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, 4.0f, 12.0f, 4.0f); 
-	SetMesh(0, pCubeMesh);
+	/*CCubeMeshDiffused *pCubeMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, 4.0f, 12.0f, 4.0f); 
+	SetMesh(0, pCubeMesh);*/
 
 	//플레이어를 렌더링할 셰이더를 생성한다. 
 	CPlayerShader *pShader = new CPlayerShader(); 
@@ -505,6 +506,17 @@ CTerrainPlayer::~CTerrainPlayer() {
 
 }
 
+void CTerrainPlayer::OnPrepareRender()
+{
+
+	CPlayer::OnPrepareRender();
+	//비행기 모델을 그리기 전에 x-축으로 90도 회전한다. 
+
+	XMMATRIX mtxRotate = XMMatrixRotationRollPitchYaw(XMConvertToRadians(90.0f), 0.0f, 0.0f);
+	m_xmf4x4World = Matrix4x4::Multiply(mtxRotate, m_xmf4x4World);
+
+}
+
 CCamera *CTerrainPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed) {
 
 	DWORD nCurrentCameraMode = (m_pCamera) ? m_pCamera->GetMode() : 0x00; 
@@ -514,32 +526,36 @@ CCamera *CTerrainPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed) 
 	switch (nNewCameraMode) {
 
 	case FIRST_PERSON_CAMERA:
-		SetFriction(250.0f); 
+		SetFriction(200.0f); 
 		//1인칭 카메라일 때 플레이어에 y-축 방향으로 중력이 작용한다. 
-		SetGravity(XMFLOAT3(0.0f, -250.0f, 0.0f)); 
-		SetMaxVelocityXZ(300.0f); 
-		SetMaxVelocityY(400.0f); 
-		m_pCamera = OnChangeCamera(FIRST_PERSON_CAMERA, nCurrentCameraMode); 
-		m_pCamera->SetTimeLag(0.0f); m_pCamera->SetOffset(XMFLOAT3(0.0f, 20.0f, 0.0f)); 
-		m_pCamera->GenerateProjectionMatrix(1.01f, 50000.0f, ASPECT_RATIO, 60.0f); 
-		break; 
-
-	case SPACESHIP_CAMERA: 
-		SetFriction(125.0f); 
-		//스페이스 쉽 카메라일 때 플레이어에 중력이 작용하지 않는다. 
 		SetGravity(XMFLOAT3(0.0f, 0.0f, 0.0f)); 
 		SetMaxVelocityXZ(300.0f); 
 		SetMaxVelocityY(400.0f); 
-		m_pCamera = OnChangeCamera(SPACESHIP_CAMERA, nCurrentCameraMode);
+		m_pCamera = OnChangeCamera(FIRST_PERSON_CAMERA, nCurrentCameraMode); 
 		m_pCamera->SetTimeLag(0.0f); 
-		m_pCamera->SetOffset(XMFLOAT3(0.0f, 0.0f, 0.0f)); 
+		m_pCamera->SetOffset(XMFLOAT3(0.0f, 20.0f, 0.0f)); 
 		m_pCamera->GenerateProjectionMatrix(1.01f, 50000.0f, ASPECT_RATIO, 60.0f); 
+		m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
+		m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
+		break;
+
+	case SPACESHIP_CAMERA: 
+		SetFriction(125.0f);
+		SetGravity(XMFLOAT3(0.0f, 0.0f, 0.0f));
+		SetMaxVelocityXZ(400.0f);
+		SetMaxVelocityY(400.0f);
+		m_pCamera = OnChangeCamera(SPACESHIP_CAMERA, nCurrentCameraMode);
+		m_pCamera->SetTimeLag(0.0f);
+		m_pCamera->SetOffset(XMFLOAT3(0.0f, 0.0f, 0.0f));
+		m_pCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 60.0f);
+		m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
+		m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
 		break; 
 	
 	case THIRD_PERSON_CAMERA: 
 		SetFriction(250.0f); 
 		//3인칭 카메라일 때 플레이어에 y-축 방향으로 중력이 작용한다. 
-		SetGravity(XMFLOAT3(0.0f, -250.0f, 0.0f));
+		SetGravity(XMFLOAT3(0.0f, 0.0f, 0.0f));
 		SetMaxVelocityXZ(300.0f);
 		SetMaxVelocityY(400.0f); 
 		m_pCamera = OnChangeCamera(THIRD_PERSON_CAMERA, nCurrentCameraMode); 
