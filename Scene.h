@@ -7,6 +7,13 @@
 #include "Shader.h"
 #include "Player.h"
 
+class CTimer;
+class CShader;
+class CObjectsShader;
+class CCamera;
+class CGameObject;
+class CHeightMapTerrain;
+
 #define MAX_LIGHTS			16 
 
 #define POINT_LIGHT			1
@@ -64,6 +71,7 @@ public:
     void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera=NULL);
 
 	void ReleaseUploadBuffers();
+	CGameObject* PickObjectPointedByCursor(int xClient, int yClient, CCamera* pCamera);
 
 	CPlayer						*m_pPlayer = NULL;
 
@@ -82,4 +90,14 @@ public:
 	LIGHTS						*m_pcbMappedLights = NULL;
 
 	float						m_fElapsedTime = 0.0f;
+
+protected:
+	CObjectsShader* m_pShaders = NULL;
+	int m_nShaders = 0;
+
+	CHeightMapTerrain* m_pTerrain = NULL;
+
+public:
+	CHeightMapTerrain* GetTerrain() { return(m_pTerrain); }
+
 };

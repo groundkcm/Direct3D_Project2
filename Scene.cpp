@@ -7,6 +7,7 @@
 
 CScene::CScene()
 {
+	m_pd3dGraphicsRootSignature = NULL;
 }
 
 CScene::~CScene()
@@ -65,92 +66,48 @@ void CScene::BuildDefaultLightsAndMaterials()
 void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList)
 {
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
+	XMFLOAT3 xmf3Scale(8.0f, 2.0f, 8.0f); XMFLOAT4 xmf4Color(0.0f, 0.2f, 0.0f, 0.0f);
 
+	//???
 	CMaterial::PrepareShaders(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 
 	BuildDefaultLightsAndMaterials();
 
-	m_nGameObjects = 2;
-	m_ppGameObjects = new CGameObject*[m_nGameObjects];
 
-	CGameObject* pPlaneModel = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/B_Plane.bin");
-	CApacheObject* pPlaneObject = NULL;
+#ifdef _WITH_TERRAIN_PARTITION 
+	/*
+	하나의 격자 메쉬의 크기는 가로x세로(17x17)이다.
+	지형 전체는 가로 방향으로 16개, 세로 방향으로 16의 격자 메 쉬를 가진다.
+	지형을 구성하는 격자 메쉬의 개수는 총 256(16x16)개가 된다.
+	*/
+	m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("../Assets/Image/Terrain/HeightMap.raw"), 257, 257, 17, 17, xmf3Scale, xmf4Color);
+#else
+	//지형을 하나의 격자 메쉬(257x257)로 생성한다. 
+	m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("../Assets/Image/Terrain/HeightMap.raw"), 257, 257, 257, 257, xmf3Scale, xmf4Color);
+#endif
+	m_nShaders = 1;
+	m_pShaders = new CObjectsShader[m_nShaders]
+		; m_pShaders[0].CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
+	m_pShaders[0].BuildObjects(pd3dDevice, pd3dCommandList, m_pTerrain);
 
-	pPlaneObject = new CApacheObject();
-	pPlaneObject->SetChild(pPlaneModel, true);
-	pPlaneObject->OnInitialize();
-	pPlaneObject->SetPosition(0.0f, -100.0f, 0.0f);
-	pPlaneObject->SetScale(100.0f, 100.0f, 100.0f);
-	pPlaneObject->Rotate(0.0f, 0.0f, 0.0f);
-	m_ppGameObjects[0] = pPlaneObject;
-
-	CGameObject *pApacheModel = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Apache.bin");
-	CApacheObject* pApacheObject = NULL;
-
-	pApacheObject = new CApacheObject();
-	pApacheObject->SetChild(pApacheModel, true);
-	pApacheObject->OnInitialize();
-	pApacheObject->SetPosition(0.0f, 0.0f, 160.0f);
-	pApacheObject->SetScale(1.5f, 1.5f, 1.5f);
-	pApacheObject->Rotate(0.0f, 180.0f, 0.0f);
-	m_ppGameObjects[1] = pApacheObject;
-
-	/*pApacheObject = new CApacheObject();
-	pApacheObject->SetChild(pApacheModel, true);
-	pApacheObject->OnInitialize();
-	pApacheObject->SetPosition(-75.0f, 0.0f, 80.0f);
-	pApacheObject->SetScale(1.5f, 1.5f, 1.5f);
-	pApacheObject->Rotate(0.0f, -90.0f, 0.0f);
-	m_ppGameObjects[1] = pApacheObject;
-
-	CGameObject *pGunshipModel = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Gunship.bin");
-	CGunshipObject* pGunshipObject = NULL;
-
-	pGunshipObject = new CGunshipObject();
-	pGunshipObject->SetChild(pGunshipModel, true);
-	pGunshipObject->OnInitialize();
-	pGunshipObject->SetPosition(135.0f, 40.0f, 220.0f);
-	pGunshipObject->SetScale(8.5f, 8.5f, 8.5f);
-	pGunshipObject->Rotate(0.0f, -90.0f, 0.0f);
-	m_ppGameObjects[2] = pGunshipObject;
-
-	CGameObject *pSuperCobraModel = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/SuperCobra.bin");
-	CSuperCobraObject* pSuperCobraObject = NULL;
-
-	pSuperCobraObject = new CSuperCobraObject();
-	pSuperCobraObject->SetChild(pSuperCobraModel, true);
-	pSuperCobraObject->OnInitialize();
-	pSuperCobraObject->SetPosition(95.0f, 50.0f, 50.0f);
-	pSuperCobraObject->SetScale(4.5f, 4.5f, 4.5f);
-	pSuperCobraObject->Rotate(0.0f, -90.0f, 0.0f);
-	m_ppGameObjects[3] = pSuperCobraObject;
-
-	CGameObject *pMi24Model = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Mi24.bin");
-	CMi24Object* pMi24Object = NULL;
-
-	pMi24Object = new CMi24Object();
-	pMi24Object->SetChild(pMi24Model, true);
-	pMi24Object->OnInitialize();
-	pMi24Object->SetPosition(-95.0f, 50.0f, 50.0f);
-	pMi24Object->SetScale(4.5f, 4.5f, 4.5f);
-	pMi24Object->Rotate(0.0f, -90.0f, 0.0f);
-	m_ppGameObjects[4] = pMi24Object;
-
-	CGameObject* pTerrainModel = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Terrain.bin");
-	CTerrainObject* pTerrainObject = NULL;
-
-	pTerrainObject = new CTerrainObject();
-	pTerrainObject->SetChild(pTerrainModel, true);
-	pTerrainObject->OnInitialize();
-	pTerrainObject->SetPosition(0.0f, 0.0f, 0.0f);
-	m_ppGameObjects[5] = pTerrainObject;*/
-
+	//???
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 
 void CScene::ReleaseObjects()
 {
 	if (m_pd3dGraphicsRootSignature) m_pd3dGraphicsRootSignature->Release();
+
+	for (int i = 0; i < m_nShaders; i++) {
+		m_pShaders[i].ReleaseShaderVariables();
+		m_pShaders[i].ReleaseObjects();
+	}
+
+	if (m_pShaders)
+		delete[] m_pShaders;
+
+	if (m_pTerrain)
+		delete m_pTerrain;
 
 	if (m_ppGameObjects)
 	{
@@ -231,6 +188,11 @@ void CScene::ReleaseShaderVariables()
 void CScene::ReleaseUploadBuffers()
 {
 	for (int i = 0; i < m_nGameObjects; i++) m_ppGameObjects[i]->ReleaseUploadBuffers();
+	for (int i = 0; i < m_nShaders; i++)
+		m_pShaders[i].ReleaseUploadBuffers();
+
+	if (m_pTerrain)
+		m_pTerrain->ReleaseUploadBuffers();
 }
 
 bool CScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
@@ -268,6 +230,7 @@ bool CScene::ProcessInput(UCHAR *pKeysBuffer)
 
 void CScene::Collision()
 {
+	//shader[i]로 변경?
 	m_pPlayer->m_xmOOBB = BoundingOrientedBox(XMFLOAT3(m_pPlayer->GetPosition()), XMFLOAT3(35.0f, 40.0f, 40.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
 	m_pPlayer->m_pObjectCollided = NULL;
 
@@ -296,6 +259,10 @@ void CScene::AnimateObjects(float fTimeElapsed)
 	m_fElapsedTime = fTimeElapsed;
 
 	for (int i = 0; i < m_nGameObjects; i++) m_ppGameObjects[i]->Animate(fTimeElapsed, NULL);
+	for (int i = 0; i < m_nShaders; i++)
+	{
+		m_pShaders[i].AnimateObjects(fTimeElapsed);
+	}
 
 	if (m_pLights)
 	{
@@ -327,5 +294,42 @@ void CScene::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera
 			m_ppGameObjects[i]->Render(pd3dCommandList, pCamera);
 		}
 	}
+}
+
+
+CGameObject* CScene::PickObjectPointedByCursor(int xClient, int yClient, CCamera* pCamera) 
+{
+
+	if (!pCamera)
+		return(NULL);
+
+	XMFLOAT4X4 xmf4x4View = pCamera->GetViewMatrix();
+	XMFLOAT4X4 xmf4x4Projection = pCamera->GetProjectionMatrix();
+	D3D12_VIEWPORT d3dViewport = pCamera->GetViewport();
+	XMFLOAT3 xmf3PickPosition;
+	/*
+		화면 좌표계의 점 (xClient, yClient)를 화면 좌표 변환의 역변환과 투영 변환의 역변환을 한다.
+		그 결과는 카메라 좌표계의 점이다. 투영 평면이 카메라에서 z-축으로 거리가 1이므로 z-좌표는 1로 설정한다.
+	*/
+	xmf3PickPosition.x = (((2.0f * xClient) / d3dViewport.Width) - 1) / xmf4x4Projection._11;
+	xmf3PickPosition.y = -(((2.0f * yClient) / d3dViewport.Height) - 1) / xmf4x4Projection._22;
+	xmf3PickPosition.z = 1.0f;
+
+	int nIntersected = 0;
+	float fHitDistance = FLT_MAX, fNearestHitDistance = FLT_MAX;
+	CGameObject* pIntersectedObject = NULL, * pNearestObject = NULL;
+
+	//셰이더의 모든 게임 객체들에 대한 마우스 픽킹을 수행하여 카메라와 가장 가까운 게임 객체를 구한다.
+	for (int i = 0; i < m_nShaders; i++)
+	{
+		pIntersectedObject = m_pShaders[i].PickObjectByRayIntersection(xmf3PickPosition, xmf4x4View, &fHitDistance);
+		if (pIntersectedObject && (fHitDistance < fNearestHitDistance))
+		{
+			fNearestHitDistance = fHitDistance;
+			pNearestObject = pIntersectedObject;
+		}
+	}
+	return(pNearestObject);
+
 }
 
