@@ -375,7 +375,7 @@ CAirplanePlayer::CAirplanePlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommand
 	
 	SetMesh(0, pAirplaneMesh); m_pCamera = ChangeCamera(SPACESHIP_CAMERA/*THIRD_PERSON_CAMERA*/, 0.0f);
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
-	SetPosition(XMFLOAT3(0.0f, 0.0f, -50.0f));
+	SetPosition(XMFLOAT3(0.0f, 0.0f, 100.0f));
 	
 	CPlayerShader *pShader = new CPlayerShader();
 	
@@ -475,8 +475,6 @@ CTerrainPlayer::CTerrainPlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandLi
 	CTerrainPlayer::OnPrepareRender();
 
 	CHeightMapTerrain *pTerrain = (CHeightMapTerrain *)pContext;
-	//플레이어의 위치를 지형의 가운데(y-축 좌표는 지형의 높이보다 1500 높게)로 설정한다. 
-	//플레이어 위치 벡터의 y좌표가 지형의 높이보다 크고 중력이 작용하도록 플레이어를 설정하였으므로 플레이어는 점차적으로 하강하게 된다. 
 	float fHeight = pTerrain->GetHeight(pTerrain->GetWidth()*0.5f, pTerrain->GetLength()*0.5f); 
 	SetPosition(XMFLOAT3(pTerrain->GetWidth()*0.5f, fHeight + 50.0f, pTerrain->GetLength()*0.5f)); 
 	
@@ -489,10 +487,6 @@ CTerrainPlayer::CTerrainPlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandLi
 	CMesh* pAirplaneMesh = new CAirplaneMeshDiffused(pd3dDevice, pd3dCommandList, 20.0f, 20.0f, 4.0f, XMFLOAT4(0.5f, 0.0f, 0.0f, 0.0f));
 
 	SetMesh(0, pAirplaneMesh); 
-	//m_pCamera = ChangeCamera(SPACESHIP_CAMERA/*THIRD_PERSON_CAMERA*/, 0.0f);
-
-	/*CCubeMeshDiffused *pCubeMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, 4.0f, 12.0f, 4.0f); 
-	SetMesh(0, pCubeMesh);*/
 
 	//플레이어를 렌더링할 셰이더를 생성한다. 
 	CPlayerShader *pShader = new CPlayerShader(); 
