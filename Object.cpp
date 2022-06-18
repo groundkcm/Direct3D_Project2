@@ -743,7 +743,7 @@ CGameObject *CGameObject::LoadGeometryFromFile(ID3D12Device *pd3dDevice, ID3D12G
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-CRotatingObject::CRotatingObject()
+CRotatingObject::CRotatingObject(int nMeshes) : CGameObject(nMeshes)
 {
 	m_xmf3RotationAxis = XMFLOAT3(0.0f, 1.0f, 0.0f);
 	m_fRotationSpeed = 15.0f;

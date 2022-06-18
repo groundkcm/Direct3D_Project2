@@ -209,7 +209,7 @@ public:
 class CRotatingObject : public CGameObject
 {
 public:
-	CRotatingObject();
+	CRotatingObject(int nMeshes = 1);
     virtual ~CRotatingObject();
 
 private:

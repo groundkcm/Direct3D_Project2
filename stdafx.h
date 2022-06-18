@@ -77,6 +77,13 @@ inline void Swap(float *pfS, float *pfT) { float fTemp = *pfS; *pfS = *pfT; *pfT
 
 namespace Vector3
 {
+	inline bool IsZero(XMFLOAT3& xmf3Vector) {
+		if (xmf3Vector.x == 0.0f && xmf3Vector.y == 0.0f && xmf3Vector.z == 0.0f)
+			return(true);
+
+		return(false);
+	}
+
 	inline XMFLOAT3 XMVectorToFloat3(XMVECTOR& xmvVector)
 	{
 		XMFLOAT3 xmf3Result;
