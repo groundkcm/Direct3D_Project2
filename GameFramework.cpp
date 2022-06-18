@@ -492,12 +492,12 @@ void CGameFramework::ProcessInput()
 	*/ 
 	if (::GetKeyboardState(pKeyBuffer)) 
 	{ 
-		if (pKeyBuffer[VK_UP] & 0xF0) dwDirection |= DIR_FORWARD; 
-		if (pKeyBuffer[VK_DOWN] & 0xF0) dwDirection |= DIR_BACKWARD; 
-		if (pKeyBuffer[VK_LEFT] & 0xF0) dwDirection |= DIR_LEFT; 
-		if (pKeyBuffer[VK_RIGHT] & 0xF0) dwDirection |= DIR_RIGHT; 
-		if (pKeyBuffer[VK_PRIOR] & 0xF0) dwDirection |= DIR_UP;
-		if (pKeyBuffer[VK_NEXT] & 0xF0) dwDirection |= DIR_DOWN; 
+		if (pKeyBuffer['W'] & 0xF0) dwDirection |= DIR_FORWARD; 
+		if (pKeyBuffer['S'] & 0xF0) dwDirection |= DIR_BACKWARD; 
+		if (pKeyBuffer['A'] & 0xF0) dwDirection |= DIR_LEFT; 
+		if (pKeyBuffer['D'] & 0xF0) dwDirection |= DIR_RIGHT; 
+		if (pKeyBuffer['Q'] & 0xF0) dwDirection |= DIR_UP;
+		if (pKeyBuffer['E'] & 0xF0) dwDirection |= DIR_DOWN; 
 	} 
 	
 	float cxDelta = 0.0f, cyDelta = 0.0f; 
