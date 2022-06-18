@@ -474,6 +474,45 @@ CCamera *CAirplanePlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 
 }
 
+void CAirplanePlayer::FireBullet(CGameObject* pLockedObject)
+{
+	/*
+		if (pLockedObject)
+		{
+			LookAt(pLockedObject->GetPosition(), XMFLOAT3(0.0f, 1.0f, 0.0f));
+			OnUpdateTransform();
+		}
+	*/
+
+	CBulletObject* pBulletObject = NULL;
+	for (int i = 0; i < 50; i++)
+	{
+		if (!m_ppBullets[i]->m_bActive)
+		{
+			pBulletObject = m_ppBullets[i];
+			break;
+		}
+	}
+
+	if (pBulletObject)
+	{
+		XMFLOAT3 xmf3Position = GetPosition();
+		XMFLOAT3 xmf3Direction = GetUp();
+		XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(xmf3Direction, 6.0f, false));
+
+		pBulletObject->m_xmf4x4World = m_xmf4x4World;
+
+		pBulletObject->SetFirePosition(xmf3FirePosition);
+		pBulletObject->SetMovingDirection(xmf3Direction);
+		pBulletObject->SetActive(true);
+
+		if (pLockedObject)
+		{
+			pBulletObject->m_pLockedObject = pLockedObject;
+		}
+	}
+}
+
 void CAirplanePlayer::OnPlayerUpdateCallback(float fTimeElapsed) {
 
 	XMFLOAT3 xmf3PlayerPosition = GetPosition();

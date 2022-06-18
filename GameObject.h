@@ -16,12 +16,19 @@ private:
 	int m_nReferences = 0;
 
 public: 
+	XMFLOAT4X4					m_xmf4x4World = Matrix4x4::Identity();
+	bool						m_bActive = true;
+	float						m_fMovingSpeed = 0.0f;
+	XMFLOAT3					m_xmf3MovingDirection = XMFLOAT3(0.0f, 0.0f, 1.0f);
+	float						m_fRotationSpeed = 0.0f;
+	CMesh						*m_pMesh = NULL;
+	BoundingOrientedBox			m_xmOOBB = BoundingOrientedBox();
+
 	void AddRef() { m_nReferences++; } 
 	void Release() { if (--m_nReferences <= 0) delete this; }
 	void Rotate(XMFLOAT3 *pxmf3Axis, float fAngle);
 
 protected:
-	XMFLOAT4X4 m_xmf4x4World;
 	CShader *m_pShader = NULL;
 	//게임 객체는 여러 개의 메쉬를 포함하는 경우 게임 객체가 가지는 메쉬들에 대한 포인터와 그 개수이다. 
 	CMesh **m_ppMeshes = NULL;
@@ -34,6 +41,12 @@ public:
 	virtual void Animate(float fTimeElapsed);
 	virtual void OnPrepareRender(); 
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera);
+
+	void SetActive(bool bActive) { m_bActive = bActive; }
+	void SetMovingDirection(XMFLOAT3& xmf3MovingDirection) { m_xmf3MovingDirection = Vector3::Normalize(xmf3MovingDirection); }
+
+	void UpdateBoundingBox();
+
 
 public: 
 	//상수 버퍼를 생성한다. 
@@ -120,4 +133,27 @@ public:
 	float GetWidth() { return(m_nWidth * m_xmf3Scale.x); } 
 	float GetLength() { return(m_nLength * m_xmf3Scale.z); } 
 
+};
+
+class CBulletObject : public CGameObject
+{
+public:
+	CBulletObject(float fEffectiveRange);
+	virtual ~CBulletObject();
+
+public:
+	virtual void Animate(float fElapsedTime);
+
+	float						m_fBulletEffectiveRange = 50.0f;
+	float						m_fMovingDistance = 0.0f;
+	float						m_fRotationAngle = 0.0f;
+	XMFLOAT3					m_xmf3FirePosition = XMFLOAT3(0.0f, 0.0f, 1.0f);
+
+	float						m_fElapsedTimeAfterFire = 0.0f;
+	float						m_fLockingDelayTime = 0.3f;
+	float						m_fLockingTime = 4.0f;
+	CGameObject* m_pLockedObject = NULL;
+
+	void SetFirePosition(XMFLOAT3 xmf3FirePosition);
+	void Reset();
 };

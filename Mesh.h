@@ -47,6 +47,7 @@ public:
 	int CheckRayIntersection(XMFLOAT3& xmRayPosition, XMFLOAT3& xmRayDirection, float *pfNearHitDistance);
 
 	BoundingOrientedBox GetBoundingBox() { return(m_xmBoundingBox); }
+	BoundingOrientedBox			m_xmOOBB = BoundingOrientedBox();
 
 protected: 
 	ID3D12Resource *m_pd3dVertexBuffer = NULL; 

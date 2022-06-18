@@ -296,6 +296,13 @@ namespace Matrix4x4 {
 	
 	}
 
+	inline XMFLOAT4X4 RotationYawPitchRoll(float fPitch, float fYaw, float fRoll)
+	{
+		XMFLOAT4X4 xmmtx4x4Result;
+		XMStoreFloat4x4(&xmmtx4x4Result, XMMatrixRotationRollPitchYaw(XMConvertToRadians(fPitch), XMConvertToRadians(fYaw), XMConvertToRadians(fRoll)));
+		return(xmmtx4x4Result);
+	}
+
 	/* 행렬에 대한 전치 행렬을 반환한다. */
 	inline XMFLOAT4X4 Transpose(XMFLOAT4X4& xmmtx4x4Matrix) { 
 		
