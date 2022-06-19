@@ -380,8 +380,8 @@ void CPlayer::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamer
 	if (nCameraMode == THIRD_PERSON_CAMERA) 
 		CGameObject::Render(pd3dCommandList, pCamera);
 	
-	//for (int i = 0; i < 50; i++) if (m_ppBullets[i]->m_bActive) m_ppBullets[i]->Render(hDCFrameBuffer, pCamera);
-
+	for (int i = 0; i < 50; i++) if (m_ppBullets[i]->m_bActive) m_ppBullets[i];
+	//CMesh::Render(pd3dCommandList);
 }
 
 CAirplanePlayer::CAirplanePlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, void* pContext, int nMeshes) : CPlayer(nMeshes) 
@@ -404,7 +404,7 @@ CAirplanePlayer::CAirplanePlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommand
 	CCubeMeshDiffused* pBulletMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, 1.0f, 4.0f, 1.0f);
 	for (int i = 0; i < 50; i++)
 	{
-		m_ppBullets[i] = new CBulletObject(m_fBulletEffectiveRange);
+		m_ppBullets[i] = new CBulletObject(m_fBulletEffectiveRange, 1);
 		m_ppBullets[i]->SetMesh(0, pBulletMesh);
 		m_ppBullets[i]->SetRotationAxis(XMFLOAT3(0.0f, 1.0f, 0.0f));
 		m_ppBullets[i]->SetRotationSpeed(360.0f);
@@ -511,6 +511,7 @@ void CAirplanePlayer::OnUpdateTransform()
 
 	m_xmf4x4World = Matrix4x4::Multiply(XMMatrixRotationRollPitchYaw(XMConvertToRadians(90.0f), 0.0f, 0.0f), m_xmf4x4World);
 }
+
 void CAirplanePlayer::FireBullet(CGameObject* pLockedObject)
 {
 	

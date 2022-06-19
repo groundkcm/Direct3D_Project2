@@ -366,7 +366,7 @@ CHeightMapTerrain::~CHeightMapTerrain(void) {
 
 }
 
-CBulletObject::CBulletObject(float fEffectiveRange)
+CBulletObject::CBulletObject(float fEffectiveRange, int nMeshes) : CGameObject(nMeshes)
 {
 	m_fBulletEffectiveRange = fEffectiveRange;
 }

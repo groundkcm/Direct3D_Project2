@@ -147,7 +147,7 @@ public:
 class CBulletObject : public CGameObject
 {
 public:
-	CBulletObject(float fEffectiveRange);
+	CBulletObject(float fEffectiveRange, int nMeshes = 1);
 	virtual ~CBulletObject();
 
 public:

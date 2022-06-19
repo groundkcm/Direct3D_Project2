@@ -325,7 +325,7 @@ void CObjectsShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsComman
 	m_ppObjects = new CGameObject*[m_nObjects];
 	postemp.reserve(m_nObjects);
 
-	CAirplaneMeshDiffused *pAirplaneMesh = new CAirplaneMeshDiffused(pd3dDevice, pd3dCommandList, 20.0f, 20.0f, 4.0f, XMFLOAT4(0.5f, 0.0f, 0.0f, 0.0f));
+	CAirplaneMeshDiffused *pAirplaneMesh = new CAirplaneMeshDiffused(pd3dDevice, pd3dCommandList, 20.0f, 20.0f, 4.0f, XMFLOAT4(0.5f, 0.0f, 0.5f, 0.0f));
 	CAirplaneObject* airobject = NULL;
 
 	airobject = new CAirplaneObject(pd3dDevice, pd3dCommandList, 1);
@@ -358,6 +358,23 @@ void CObjectsShader::ReleaseObjects()
 }
 
 extern std::vector<CPlayer*> v;
+static float a[10];
+
+void CObjectsShader::CheckObjectByBulletCollisions()
+{
+	CBulletObject** ppBullets = v[0]->m_ppBullets;
+	for (int i = 0; i < m_nObjects; i++)
+	{
+		for (int j = 0; j < 50; j++)
+		{
+			if (ppBullets[j]->m_bActive && m_ppObjects[i]->m_xmOOBB.Intersects(ppBullets[j]->m_xmOOBB))
+			{
+				m_ppObjects[i]->SetPosition(postemp[i]);
+				ppBullets[j]->Reset();
+			}
+		}
+	}
+}
 
 void CObjectsShader::Collision()
 {
@@ -369,6 +386,7 @@ void CObjectsShader::Collision()
 	for (int i = 0; i < m_nObjects; ++i) {
 		if (m_ppObjects[i]->m_xmOOBB.Intersects(v[0]->m_xmOOBB)) {
 			m_ppObjects[i]->SetPosition(postemp[i]);
+			a[i] = 0.0f;
 		}
 		for (int j = (i + 1); j < m_nObjects; j++)
 		{
@@ -380,27 +398,23 @@ void CObjectsShader::Collision()
 		}
 	}
 }
+
 void CObjectsShader::AnimateObjects(float fTimeElapsed) 
 {
 
 	static XMVECTOR vtemp, ptemp, ltemp;
-	static float a[10];
 	for (int j = 0; j < m_nObjects; j++) 
-	{ 
-
+	{
 		vtemp = XMLoadFloat3(&m_ppObjects[j]->GetPosition());
 		ptemp = XMLoadFloat3(&v[0]->GetPosition());
-		
 
 		ltemp = XMVectorLerp(vtemp, ptemp, a[j]);
 
 		m_ppObjects[j]->SetPosition(Vector3::XMVectorToFloat3(ltemp));
-
 		Collision();
+		CheckObjectByBulletCollisions();
 
-		a[j] = 0.000001f;
-
-		if (a[j] > 1.0f) a[j] = 0.0f;
+		a[j] += 0.0000001f;
 
 		//---------------------------------------------------------------
 

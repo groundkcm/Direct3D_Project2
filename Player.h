@@ -126,6 +126,7 @@ public:
 	virtual void OnUpdateTransform();
 	void LookAt(XMFLOAT3& xmf3LookAt, XMFLOAT3& xmf3Up);
 
+	CBulletObject* m_ppBullets[50];
 };
 
 ///////////////////////////////////////////////////////////////////
@@ -137,7 +138,6 @@ public:
 	virtual ~CAirplanePlayer();
 
 	float						m_fBulletEffectiveRange = 150.0f;
-	CBulletObject* m_ppBullets[50];
 
 	virtual void OnUpdateTransform();
 	void FireBullet(CGameObject* pLockedObject);
