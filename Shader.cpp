@@ -313,7 +313,7 @@ void CObjectsShader::CreateShader(ID3D12Device *pd3dDevice, ID3D12RootSignature 
 
 }
 
-std::vector<CAirplaneObject*> objecttemp;
+std::vector<XMFLOAT3> postemp;
 void CObjectsShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, void *pContext) 
 {
 	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)pContext;
@@ -323,7 +323,7 @@ void CObjectsShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsComman
 
 	m_nObjects = 1;
 	m_ppObjects = new CGameObject*[m_nObjects];
-	objecttemp.reserve(m_nObjects);
+	postemp.reserve(m_nObjects);
 
 	CAirplaneMeshDiffused *pAirplaneMesh = new CAirplaneMeshDiffused(pd3dDevice, pd3dCommandList, 20.0f, 20.0f, 4.0f, XMFLOAT4(0.5f, 0.0f, 0.0f, 0.0f));
 	CAirplaneObject* airobject = NULL;
@@ -336,7 +336,7 @@ void CObjectsShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsComman
 	airobject->SetMesh(0, pAirplaneMesh);
 	airobject->SetPosition(xPos, yPos + 50.0f, zPos);
 	m_ppObjects[0] = airobject;
-	objecttemp.push_back(airobject);
+	postemp.push_back(airobject->GetPosition());
 	
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
@@ -368,7 +368,7 @@ void CObjectsShader::Collision()
 
 	for (int i = 0; i < m_nObjects; ++i) {
 		if (m_ppObjects[i]->m_xmOOBB.Intersects(v[0]->m_xmOOBB)) {
-			m_ppObjects[i]->SetPosition(objecttemp[i]->GetPosition());
+			m_ppObjects[i]->SetPosition(postemp[i]);
 		}
 		for (int j = (i + 1); j < m_nObjects; j++)
 		{
@@ -382,7 +382,6 @@ void CObjectsShader::Collision()
 }
 void CObjectsShader::AnimateObjects(float fTimeElapsed) 
 {
-	Collision();
 
 	static XMVECTOR vtemp, ptemp, ltemp;
 	static float a[10];
@@ -397,7 +396,9 @@ void CObjectsShader::AnimateObjects(float fTimeElapsed)
 
 		m_ppObjects[j]->SetPosition(Vector3::XMVectorToFloat3(ltemp));
 
-		a[j] += 0.000001f;
+		Collision();
+
+		a[j] = 0.000001f;
 
 		if (a[j] > 1.0f) a[j] = 0.0f;
 
