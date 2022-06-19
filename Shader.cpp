@@ -313,6 +313,9 @@ void CObjectsShader::CreateShader(ID3D12Device *pd3dDevice, ID3D12RootSignature 
 void CObjectsShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, void *pContext) 
 {
 	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)pContext;
+	float xPosition = pTerrain->GetWidth();
+	float zPosition = pTerrain->GetLength();
+	float xPos{}, yPos{}, zPos{};
 
 	m_nObjects = 1;
 	m_ppObjects = new CGameObject*[m_nObjects];
@@ -321,15 +324,20 @@ void CObjectsShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsComman
 	CAirplaneObject* airobject = NULL;
 
 	airobject = new CAirplaneObject(pd3dDevice, pd3dCommandList, 1);
+	xPos = xPosition / 2;
+	zPos = xPosition / 3;
+	yPos = pTerrain->GetHeight(xPos, zPos);
+
 	airobject->SetMesh(0, pAirplaneMesh);
-	airobject->SetPosition(0.0f, pTerrain->GetHeight(0.0f, 100.0f) + 100.0f, 100.0f);
+	airobject->SetPosition(xPos, yPos + 100.0f, zPos);
 	m_ppObjects[0] = airobject;
 	
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 }
 
-void CObjectsShader::ReleaseObjects() {
+void CObjectsShader::ReleaseObjects() 
+{
 
 	if (m_ppObjects) 
 	{ 
@@ -343,16 +351,22 @@ void CObjectsShader::ReleaseObjects() {
 
 }
 
-void CObjectsShader::AnimateObjects(float fTimeElapsed) { 
-
+void CObjectsShader::AnimateObjects(float fTimeElapsed) 
+{ 
 	for (int j = 0; j < m_nObjects; j++) 
 	{ 
+		//m_ppObjects[j]->SetPosition(0.0f, 0.0f, 0.0f);
+
+
+
+		//---------------------------------------------------------------
 		m_ppObjects[j]->Animate(fTimeElapsed); 
 	}
 
 }
 
-void CObjectsShader::ReleaseUploadBuffers() { 
+void CObjectsShader::ReleaseUploadBuffers() 
+{ 
 
 	if (m_ppObjects) { 
 		for (int j = 0; j < m_nObjects; j++) 
@@ -361,7 +375,8 @@ void CObjectsShader::ReleaseUploadBuffers() {
 
 }
 
-void CObjectsShader::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera) {
+void CObjectsShader::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera) 
+{
 	
 	CShader::Render(pd3dCommandList, pCamera);
 
@@ -374,7 +389,8 @@ void CObjectsShader::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera 
 
 }
 
-CGameObject *CObjectsShader::PickObjectByRayIntersection(XMFLOAT3& xmf3PickPosition, XMFLOAT4X4& xmf4x4View, float *pfNearHitDistance) { 
+CGameObject *CObjectsShader::PickObjectByRayIntersection(XMFLOAT3& xmf3PickPosition, XMFLOAT4X4& xmf4x4View, float *pfNearHitDistance) 
+{ 
 	
 	int nIntersected = 0; *pfNearHitDistance = FLT_MAX; 
 	float fHitDistance = FLT_MAX;

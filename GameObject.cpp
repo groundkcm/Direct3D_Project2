@@ -444,8 +444,9 @@ void CBulletObject::Animate(float fElapsedTime)
 	if ((m_fMovingDistance > m_fBulletEffectiveRange) || (m_fElapsedTimeAfterFire > m_fLockingTime)) Reset();
 }
 
-CAirplaneObject::CAirplaneObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nMeshes) : CGameObject(nMeshes) {
-
+CAirplaneObject::CAirplaneObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nMeshes) : CGameObject(nMeshes) 
+{
+	OnPrepareRender();
 	//SetPlayerUpdatedContext(pTerrain);
 
 	//SetCameraUpdatedContext(pTerrain);

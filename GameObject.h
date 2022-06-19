@@ -177,6 +177,6 @@ public:
 	virtual void OnUpdateTransform();
 	void FireBullet(CGameObject* pLockedObject);
 	
-	virtual void OnPrepareRender();
+	void OnPrepareRender();
 	//virtual void OnPlayerUpdateCallback(float fTimeElapsed);
 };
