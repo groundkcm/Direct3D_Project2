@@ -3,6 +3,9 @@
 #include "GameObject.h"
 #include "Camera.h"
 #include "Mesh.h"
+#include "Player.h"
+#include <vector>
+
 
 CShader::~CShader() 
 { 
@@ -310,6 +313,7 @@ void CObjectsShader::CreateShader(ID3D12Device *pd3dDevice, ID3D12RootSignature 
 
 }
 
+std::vector<CAirplaneObject*> objecttemp;
 void CObjectsShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, void *pContext) 
 {
 	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)pContext;
@@ -319,6 +323,7 @@ void CObjectsShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsComman
 
 	m_nObjects = 1;
 	m_ppObjects = new CGameObject*[m_nObjects];
+	objecttemp.reserve(m_nObjects);
 
 	CAirplaneMeshDiffused *pAirplaneMesh = new CAirplaneMeshDiffused(pd3dDevice, pd3dCommandList, 20.0f, 20.0f, 4.0f, XMFLOAT4(0.5f, 0.0f, 0.0f, 0.0f));
 	CAirplaneObject* airobject = NULL;
@@ -331,6 +336,7 @@ void CObjectsShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsComman
 	airobject->SetMesh(0, pAirplaneMesh);
 	airobject->SetPosition(xPos, yPos + 100.0f, zPos);
 	m_ppObjects[0] = airobject;
+	objecttemp.push_back(airobject);
 	
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
@@ -351,6 +357,30 @@ void CObjectsShader::ReleaseObjects()
 
 }
 
+extern std::vector<CPlayer*> v;
+
+void CObjectsShader::Collision()
+{
+	for (int i = 0; i < m_nObjects; ++i) {
+		m_ppObjects[i]->m_xmOOBB = BoundingOrientedBox(XMFLOAT3(m_ppObjects[i]->GetPosition()), XMFLOAT3(20.0f, 20.0f, 4.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
+		m_ppObjects[i]->m_pObjectCollided = NULL;
+	}
+
+	for (int i = 0; i < m_nObjects; ++i) {
+		if (m_ppObjects[i]->m_xmOOBB.Intersects(v[0]->m_xmOOBB)) {
+			//m_ppObjects[i]->SetPosition(objecttemp[i]->GetPosition());
+			m_ppObjects[i]->SetPosition(0.0f, 0.0f, 0.0f);
+		}
+		for (int j = (i + 1); j < m_nObjects; j++)
+		{
+			if (m_ppObjects[i]->m_xmOOBB.Intersects(m_ppObjects[j]->m_xmOOBB))
+			{
+				m_ppObjects[i]->m_pObjectCollided = m_ppObjects[j];
+				m_ppObjects[j]->m_pObjectCollided = m_ppObjects[i];
+			}
+		}
+	}
+}
 void CObjectsShader::AnimateObjects(float fTimeElapsed) 
 { 
 	for (int j = 0; j < m_nObjects; j++) 
@@ -360,6 +390,8 @@ void CObjectsShader::AnimateObjects(float fTimeElapsed)
 
 
 		//---------------------------------------------------------------
+		Collision();
+
 		m_ppObjects[j]->Animate(fTimeElapsed); 
 	}
 

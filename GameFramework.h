@@ -152,6 +152,6 @@ public:
 							/* 프레임 관련 함수 */
 	void MoveToNextFrame();
 	void ProcessSelectedObject(DWORD dwDirection, float cxDelta, float cyDelta);
-
+	virtual void Collision();
 };
 

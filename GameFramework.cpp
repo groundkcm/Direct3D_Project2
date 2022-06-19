@@ -1,8 +1,8 @@
 #include "stdafx.h"
-
 #include "GameFramework.h"
 #include "Scene.h"
 #include "Player.h"
+#include <vector>
 
 
 CGameFramework::CGameFramework()	// O
@@ -469,6 +469,20 @@ void CGameFramework::BuildObjects()
 
 }
 
+std::vector<CPlayer*> v;
+void CGameFramework::Collision()
+{
+	static int cnt;
+	if (!cnt) {
+		v.push_back(m_pPlayer);
+		cnt = 1;
+	}
+
+	m_pPlayer->m_xmOOBB = BoundingOrientedBox(XMFLOAT3(m_pPlayer->GetPosition()), XMFLOAT3(20.0f, 20.0f, 4.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
+	m_pPlayer->m_pObjectCollided = NULL;
+	v[0] = m_pPlayer;
+}
+
 /*   렌더링할 객체를 소멸시키는 함수   */
 void CGameFramework::ReleaseObjects()
 {
@@ -541,6 +555,7 @@ void CGameFramework::ProcessInput()
 /* 오브젝트들의 움직임을 처리하는 함수 */
 void CGameFramework::AnimateObjects()
 {
+	Collision();
 	if (m_pScene) m_pScene->AnimateObjects(m_GameTimer.GetTimeElapsed());
 }
 

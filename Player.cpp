@@ -440,6 +440,7 @@ void CAirplanePlayer::OnPrepareRender() {
 	
 */
 
+
 //카메라를 변경할 때 호출되는 함수이다. nNewCameraMode는 새로 설정할 카메라 모드이다.
 CCamera *CAirplanePlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed) { 
 

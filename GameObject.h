@@ -23,7 +23,10 @@ public:
 	XMFLOAT3					m_xmf3RotationAxis = XMFLOAT3(0.0f, 1.0f, 0.0f);
 	float						m_fRotationSpeed = 0.0f;
 	CMesh						*m_pMesh = NULL;
+
 	BoundingOrientedBox			m_xmOOBB = BoundingOrientedBox();
+	CGameObject					*m_pObjectCollided = NULL;
+	bool						m_pPlayerCollided = false;
 
 	void AddRef() { m_nReferences++; } 
 	void Release() { if (--m_nReferences <= 0) delete this; }

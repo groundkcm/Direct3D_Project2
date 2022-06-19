@@ -78,7 +78,8 @@ public:
 	virtual D3D12_SHADER_BYTECODE CreateVertexShader(ID3DBlob **ppd3dShaderBlob); 
 	virtual D3D12_SHADER_BYTECODE CreatePixelShader(ID3DBlob **ppd3dShaderBlob);
 
-	virtual void CreateShader(ID3D12Device *pd3dDevice, ID3D12RootSignature *pd3dGraphicsRootSignature);
+	virtual void Collision();
+	virtual void CreateShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature);
 
 	virtual void ReleaseUploadBuffers();
 
@@ -90,7 +91,7 @@ public:
 protected:
 	CGameObject **m_ppObjects = NULL; 
 	int m_nObjects = 0;
-
+	CPlayer	*m_pPlayer = NULL;
 };
 
 
