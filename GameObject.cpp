@@ -78,12 +78,26 @@ void CGameObject::ReleaseUploadBuffers() {
 
 }
 
-void CGameObject::Animate(float fTimeElapsed) { 
+void CGameObject::Animate(float fTimeElapsed) 
+{ 
 
 }
 
-void CGameObject::OnPrepareRender() { 
+void CGameObject::OnPrepareRender() 
+{
+	m_xmf4x4World._11 = GetRight().x;		m_xmf4x4World._12 = GetRight().y;		m_xmf4x4World._13 = GetRight().z;
+	m_xmf4x4World._21 = GetUp().x;			m_xmf4x4World._22 = GetUp().y;			m_xmf4x4World._23 = GetUp().z;
+	m_xmf4x4World._31 = GetLook().x;		m_xmf4x4World._32 = GetLook().y;		m_xmf4x4World._33 = GetLook().z;
+	m_xmf4x4World._41 = GetPosition().x;	m_xmf4x4World._42 = GetPosition().y;	m_xmf4x4World._43 = GetPosition().z;
 
+}
+
+void CGameObject::OnUpdateTransform()
+{
+	m_xmf4x4World._11 = GetRight().x;		m_xmf4x4World._12 = GetRight().y;		m_xmf4x4World._13 = GetRight().z;
+	m_xmf4x4World._21 = GetUp().x;			m_xmf4x4World._22 = GetUp().y;			m_xmf4x4World._23 = GetUp().z;
+	m_xmf4x4World._31 = GetLook().x;		m_xmf4x4World._32 = GetLook().y;		m_xmf4x4World._33 = GetLook().z;
+	m_xmf4x4World._41 = GetPosition().x;	m_xmf4x4World._42 = GetPosition().y;	m_xmf4x4World._43 = GetPosition().z;
 }
 
 void CGameObject::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera) {
@@ -215,6 +229,14 @@ void CGameObject::Rotate(float fPitch, float fYaw, float fRoll) {
 	XMMATRIX mtxRotate = XMMatrixRotationRollPitchYaw(XMConvertToRadians(fPitch), XMConvertToRadians(fYaw), XMConvertToRadians(fRoll));
 	m_xmf4x4World = Matrix4x4::Multiply(mtxRotate, m_xmf4x4World);
 
+}
+
+void CGameObject::LookAt(XMFLOAT3& xmf3LookAt, XMFLOAT3& xmf3Up)
+{
+	/*XMFLOAT4X4 xmf4x4View = Matrix4x4::LookAtLH(GetPosition(), xmf3LookAt, xmf3Up);
+	m_xmf3Right = Vector3::Normalize(XMFLOAT3(xmf4x4View._11, xmf4x4View._21, xmf4x4View._31));
+	m_xmf3Up = Vector3::Normalize(XMFLOAT3(xmf4x4View._12, xmf4x4View._22, xmf4x4View._32));
+	m_xmf3Look = Vector3::Normalize(XMFLOAT3(xmf4x4View._13, xmf4x4View._23, xmf4x4View._33));*/
 }
 
 void CGameObject::GenerateRayForPicking(XMFLOAT3& xmf3PickPosition, XMFLOAT4X4& xmf4x4View, XMFLOAT3 *pxmf3PickRayOrigin, XMFLOAT3 *pxmf3PickRayDirection) {
@@ -421,3 +443,125 @@ void CBulletObject::Animate(float fElapsedTime)
 
 	if ((m_fMovingDistance > m_fBulletEffectiveRange) || (m_fElapsedTimeAfterFire > m_fLockingTime)) Reset();
 }
+
+CAirplaneObject::CAirplaneObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext, int nMeshes) : CGameObject(nMeshes) {
+
+	CMesh* pAirplaneMesh = new CAirplaneMeshDiffused(pd3dDevice, pd3dCommandList, 20.0f, 20.0f, 4.0f, XMFLOAT4(0.5f, 0.0f, 0.0f, 0.0f));
+
+	SetMesh(0, pAirplaneMesh);
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+
+	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)pContext;
+	float fHeight = pTerrain->GetHeight(pTerrain->GetWidth() * 0.5f, pTerrain->GetLength() * 0.5f);
+	SetPosition(XMFLOAT3(pTerrain->GetWidth() * 0.5f, fHeight + 100.0f, pTerrain->GetLength() * 0.5f));
+
+	//SetPlayerUpdatedContext(pTerrain);
+
+	//SetCameraUpdatedContext(pTerrain);
+
+	CCubeMeshDiffused* pBulletMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, 1.0f, 4.0f, 1.0f);
+	for (int i = 0; i < 50; i++)
+	{
+		m_ppBullets[i] = new CBulletObject(m_fBulletEffectiveRange);
+		m_ppBullets[i]->SetMesh(0, pBulletMesh);
+		m_ppBullets[i]->SetRotationAxis(XMFLOAT3(0.0f, 1.0f, 0.0f));
+		m_ppBullets[i]->SetRotationSpeed(360.0f);
+		m_ppBullets[i]->SetMovingSpeed(120.0f);
+		m_ppBullets[i]->SetActive(false);
+	}
+
+	CPlayerShader* pShader = new CPlayerShader();
+
+	pShader->CreateShader(pd3dDevice, pd3dGraphicsRootSignature);
+	SetShader(pShader);
+
+}
+
+CAirplaneObject::~CAirplaneObject()
+{
+	for (int i = 0; i < 50; i++) if (m_ppBullets[i]) delete m_ppBullets[i];
+}
+
+void CAirplaneObject::OnPrepareRender() {
+
+	CGameObject::OnPrepareRender();
+	//비행기 모델을 그리기 전에 x-축으로 90도 회전한다. 
+
+	XMMATRIX mtxRotate = XMMatrixRotationRollPitchYaw(XMConvertToRadians(90.0f), 0.0f, 0.0f);
+	m_xmf4x4World = Matrix4x4::Multiply(mtxRotate, m_xmf4x4World);
+
+}
+
+void CAirplaneObject::OnUpdateTransform()
+{
+	CGameObject::OnUpdateTransform();
+
+	m_xmf4x4World = Matrix4x4::Multiply(XMMatrixRotationRollPitchYaw(XMConvertToRadians(90.0f), 0.0f, 0.0f), m_xmf4x4World);
+}
+
+void CAirplaneObject::FireBullet(CGameObject* pLockedObject)
+{
+
+	/*if (pLockedObject)
+	{
+		LookAt(pLockedObject->GetPosition(), XMFLOAT3(0.0f, 1.0f, 0.0f));
+		OnUpdateTransform();
+	}*/
+
+
+	CBulletObject* pBulletObject = NULL;
+	for (int i = 0; i < 50; i++)
+	{
+		if (!m_ppBullets[i]->m_bActive)
+		{
+			pBulletObject = m_ppBullets[i];
+			break;
+		}
+	}
+
+	if (pBulletObject)
+	{
+		XMFLOAT3 xmf3Position = GetPosition();
+		XMFLOAT3 xmf3Direction = GetUp();
+		XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(xmf3Direction, 6.0f, false));
+
+		pBulletObject->m_xmf4x4World = m_xmf4x4World;
+
+		pBulletObject->SetFirePosition(xmf3FirePosition);
+		pBulletObject->SetMovingDirection(xmf3Direction);
+		pBulletObject->SetActive(true);
+
+		if (pLockedObject)
+		{
+			pBulletObject->m_pLockedObject = pLockedObject;
+		}
+	}
+}
+
+//void CAirplaneObject::OnPlayerUpdateCallback(float fTimeElapsed) {
+//
+//	XMFLOAT3 xmf3PlayerPosition = GetPosition();
+//	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)m_pPlayerUpdatedContext;
+//	/*
+//	지형에서 플레이어의 현재 위치 (x, z)의 지형 높이(y)를 구한다.
+//	그리고 플레이어 메쉬의 높이가 12이고 플레이어의 중심이 직육면체의 가운데이므로 y 값에 메쉬의 높이의 절반을 더하면 플레이어의 위치가 된다.
+//	*/
+//	float fHeight = pTerrain->GetHeight(xmf3PlayerPosition.x, xmf3PlayerPosition.z) + 6.0f;
+//
+//	/*
+//		플레이어의 위치 벡터의 y-값이 음수이면(예를 들어, 중력이 적용되는 경우) 플레이어의 위치 벡터의 y-값이 점점 작아지게 된다.
+//		이때 플레이어의 현재 위치 벡터의 y 값이 지형의 높이(실제로 지형의 높이 + 6)보다 작으면 플레이어의 일부가 지형 아래에 있게 된다.
+//		이러한 경우를 방지하려면 플레이어의 속도 벡터의 y 값을 0으로 만들고 플레이어 의 위치 벡터의 y-값을 지형의 높이(실제로 지형의 높이 + 6)로 설정한다.
+//		그러면 플레이어는 항상 지형 위에 있게 된 다.
+//	*/
+//
+//	if (xmf3PlayerPosition.y < fHeight)
+//	{
+//		XMFLOAT3 xmf3PlayerVelocity = GetVelocity();
+//		xmf3PlayerVelocity.y = 0.0f;
+//		SetVelocity(xmf3PlayerVelocity);
+//		xmf3PlayerPosition.y = fHeight;
+//		SetPosition(xmf3PlayerPosition);
+//	}
+//
+//}

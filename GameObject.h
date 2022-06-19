@@ -20,6 +20,7 @@ public:
 	bool						m_bActive = true;
 	float						m_fMovingSpeed = 0.0f;
 	XMFLOAT3					m_xmf3MovingDirection = XMFLOAT3(0.0f, 0.0f, 1.0f);
+	XMFLOAT3					m_xmf3RotationAxis = XMFLOAT3(0.0f, 1.0f, 0.0f);
 	float						m_fRotationSpeed = 0.0f;
 	CMesh						*m_pMesh = NULL;
 	BoundingOrientedBox			m_xmOOBB = BoundingOrientedBox();
@@ -44,8 +45,12 @@ public:
 
 	void SetActive(bool bActive) { m_bActive = bActive; }
 	void SetMovingDirection(XMFLOAT3& xmf3MovingDirection) { m_xmf3MovingDirection = Vector3::Normalize(xmf3MovingDirection); }
+	void SetRotationAxis(XMFLOAT3& xmf3RotationAxis) { m_xmf3RotationAxis = Vector3::Normalize(xmf3RotationAxis); }
+	void SetRotationSpeed(float fSpeed) { m_fRotationSpeed = fSpeed; }
+	void SetMovingSpeed(float fSpeed) { m_fMovingSpeed = fSpeed; }
 
 	void UpdateBoundingBox();
+	virtual void OnUpdateTransform();
 
 
 public: 
@@ -60,6 +65,7 @@ public:
 	XMFLOAT3 GetLook();
 	XMFLOAT3 GetUp(); 
 	XMFLOAT3 GetRight();
+	void LookAt(XMFLOAT3& xmf3LookAt, XMFLOAT3& xmf3Up);
 
 	//게임 객체의 위치를 설정한다. 
 	void SetPosition(float x, float y, float z); 
@@ -156,4 +162,21 @@ public:
 
 	void SetFirePosition(XMFLOAT3 xmf3FirePosition);
 	void Reset();
+};
+
+class CAirplaneObject : public CGameObject
+{
+
+public:
+	CAirplaneObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext, int nMeshes = 1);
+	virtual ~CAirplaneObject();
+
+	float						m_fBulletEffectiveRange = 150.0f;
+	CBulletObject* m_ppBullets[50];
+
+	virtual void OnUpdateTransform();
+	void FireBullet(CGameObject* pLockedObject);
+	
+	virtual void OnPrepareRender();
+	//virtual void OnPlayerUpdateCallback(float fTimeElapsed);
 };

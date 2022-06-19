@@ -310,61 +310,19 @@ void CObjectsShader::CreateShader(ID3D12Device *pd3dDevice, ID3D12RootSignature 
 
 }
 
-void CObjectsShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, void *pContext) {
+void CObjectsShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, void *pContext) 
+{
+	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)pContext;
 
-	CHeightMapTerrain *pTerrain = (CHeightMapTerrain *)pContext; 
-	
-	float fTerrainWidth = pTerrain->GetWidth(), fTerrainLength = pTerrain->GetLength();
-	float fxPitch = 12.0f * 3.5f;
-	float fyPitch = 12.0f * 3.5f; 
-	float fzPitch = 12.0f * 3.5f; 
-	
-	//직육면체를 지형 표면에 그리고 지형보다 높은 위치에 일정한 간격으로 배치한다.
-	int xObjects = int(fTerrainWidth / fxPitch), yObjects = 2, zObjects = int(fTerrainLength / fzPitch); 
-	
-	m_nObjects = xObjects * yObjects * zObjects;
+	/*m_nObjects = 1;
 	m_ppObjects = new CGameObject*[m_nObjects];
 
-	CCubeMeshDiffused *pCubeMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, 12.0f, 12.0f, 12.0f);
-	CSphereMeshDiffused *pSphereMesh = new CSphereMeshDiffused(pd3dDevice, pd3dCommandList, 6.0f, 20, 20);
-
-	XMFLOAT3 xmf3RotateAxis, xmf3SurfaceNormal; 
-	CRotatingObject *pRotatingObject = NULL; 
-	for (int i = 0, x = 0; x < xObjects; x++) 
-	{
-		for (int z = 0; z < zObjects; z++)
-		{
-			for (int y = 0; y < yObjects; y++)
-			{
-				pRotatingObject = new CRotatingObject(1);
-				pRotatingObject->SetMesh(0, (i % 2) ? (CMesh *)pCubeMesh : (CMesh *)pSphereMesh);
-
-				float xPosition = x * fxPitch;
-				float zPosition = z * fzPitch;
-				float fHeight = pTerrain->GetHeight(xPosition, zPosition);
-				
-				pRotatingObject->SetPosition(xPosition, fHeight + (y * 10.0f * fyPitch) + 6.0f, zPosition);
-				if (y == 0)
-				{ 
-					/*
-						지형의 표면에 위치하는 직육면체는 지형의 기울기에 따라 방향이 다르게 배치한다. 
-						직육면체가 위치할 지형의 법선 벡터 방향과 직육면체의 y-축이 일치하도록 한다.
-					*/ 
-					xmf3SurfaceNormal = pTerrain->GetNormal(xPosition, zPosition); 
-					xmf3RotateAxis = Vector3::CrossProduct(XMFLOAT3(0.0f, 1.0f, 0.0f), xmf3SurfaceNormal);
-					if (Vector3::IsZero(xmf3RotateAxis))
-						xmf3RotateAxis = XMFLOAT3(0.0f, 1.0f, 0.0f);
-					
-					float fAngle = acos(Vector3::DotProduct(XMFLOAT3(0.0f, 1.0f, 0.0f), xmf3SurfaceNormal));
-
-					pRotatingObject->Rotate(&xmf3RotateAxis, XMConvertToDegrees(fAngle));
-				} 
-				pRotatingObject->SetRotationAxis(XMFLOAT3(0.0f, 1.0f, 0.0f));
-				pRotatingObject->SetRotationSpeed(36.0f * (i % 10) + 36.0f);
-				m_ppObjects[i++] = pRotatingObject;
-			}
-		}
-	}
+	CAirplaneMeshDiffused *pAirplaneMesh = new CAirplaneMeshDiffused(pd3dDevice, pd3dCommandList, 20.0f, 20.0f, 4.0f, XMFLOAT4(0.0f, 0.5f, 0.0f, 0.0f));
+	CAirplaneObject* airobject = NULL;
+	airobject->SetMesh(0, pAirplaneMesh);
+	airobject->SetPosition(0.0f, pTerrain->GetHeight(0.0f, 100.0f) + 20.0f, 100.0f);
+	m_ppObjects[0] = airobject;*/
+	
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 }

@@ -124,6 +124,8 @@ public:
 	
 	//플레이어의 카메라가 3인칭 카메라일 때 플레이어(메쉬)를 렌더링한다. 
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera = NULL);
+	virtual void OnUpdateTransform();
+	void LookAt(XMFLOAT3& xmf3LookAt, XMFLOAT3& xmf3Up);
 
 };
 
@@ -135,8 +137,10 @@ public:
 	CAirplanePlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, void* pContext, int nMeshes = 1);
 	virtual ~CAirplanePlayer();
 
+	float						m_fBulletEffectiveRange = 150.0f;
 	CBulletObject* m_ppBullets[50];
 
+	virtual void OnUpdateTransform();
 	void FireBullet(CGameObject* pLockedObject);
 
 	virtual CCamera* ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed);
