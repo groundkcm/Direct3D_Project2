@@ -334,7 +334,7 @@ void CObjectsShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsComman
 	yPos = pTerrain->GetHeight(xPos, zPos);
 
 	airobject->SetMesh(0, pAirplaneMesh);
-	airobject->SetPosition(xPos, yPos + 100.0f, zPos);
+	airobject->SetPosition(xPos, yPos + 50.0f, zPos);
 	m_ppObjects[0] = airobject;
 	objecttemp.push_back(airobject);
 	
@@ -368,8 +368,7 @@ void CObjectsShader::Collision()
 
 	for (int i = 0; i < m_nObjects; ++i) {
 		if (m_ppObjects[i]->m_xmOOBB.Intersects(v[0]->m_xmOOBB)) {
-			//m_ppObjects[i]->SetPosition(objecttemp[i]->GetPosition());
-			m_ppObjects[i]->SetPosition(0.0f, 0.0f, 0.0f);
+			m_ppObjects[i]->SetPosition(objecttemp[i]->GetPosition());
 		}
 		for (int j = (i + 1); j < m_nObjects; j++)
 		{
@@ -382,17 +381,30 @@ void CObjectsShader::Collision()
 	}
 }
 void CObjectsShader::AnimateObjects(float fTimeElapsed) 
-{ 
+{
+	Collision();
+
+	static XMVECTOR vtemp, ptemp, ltemp;
+	static float a[10];
 	for (int j = 0; j < m_nObjects; j++) 
 	{ 
-		//m_ppObjects[j]->SetPosition(0.0f, 0.0f, 0.0f);
 
+		vtemp = XMLoadFloat3(&m_ppObjects[j]->GetPosition());
+		ptemp = XMLoadFloat3(&v[0]->GetPosition());
+		
 
+		ltemp = XMVectorLerp(vtemp, ptemp, a[j]);
+
+		m_ppObjects[j]->SetPosition(Vector3::XMVectorToFloat3(ltemp));
+
+		a[j] += 0.000001f;
+
+		if (a[j] > 1.0f) a[j] = 0.0f;
 
 		//---------------------------------------------------------------
-		Collision();
 
 		m_ppObjects[j]->Animate(fTimeElapsed); 
+
 	}
 
 }
