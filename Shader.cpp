@@ -314,14 +314,16 @@ void CObjectsShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsComman
 {
 	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)pContext;
 
-	/*m_nObjects = 1;
+	m_nObjects = 1;
 	m_ppObjects = new CGameObject*[m_nObjects];
 
-	CAirplaneMeshDiffused *pAirplaneMesh = new CAirplaneMeshDiffused(pd3dDevice, pd3dCommandList, 20.0f, 20.0f, 4.0f, XMFLOAT4(0.0f, 0.5f, 0.0f, 0.0f));
+	CAirplaneMeshDiffused *pAirplaneMesh = new CAirplaneMeshDiffused(pd3dDevice, pd3dCommandList, 20.0f, 20.0f, 4.0f, XMFLOAT4(0.5f, 0.0f, 0.0f, 0.0f));
 	CAirplaneObject* airobject = NULL;
+
+	airobject = new CAirplaneObject(pd3dDevice, pd3dCommandList, 1);
 	airobject->SetMesh(0, pAirplaneMesh);
-	airobject->SetPosition(0.0f, pTerrain->GetHeight(0.0f, 100.0f) + 20.0f, 100.0f);
-	m_ppObjects[0] = airobject;*/
+	airobject->SetPosition(0.0f, pTerrain->GetHeight(0.0f, 100.0f) + 100.0f, 100.0f);
+	m_ppObjects[0] = airobject;
 	
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 

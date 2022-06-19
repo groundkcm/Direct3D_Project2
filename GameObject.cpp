@@ -444,16 +444,7 @@ void CBulletObject::Animate(float fElapsedTime)
 	if ((m_fMovingDistance > m_fBulletEffectiveRange) || (m_fElapsedTimeAfterFire > m_fLockingTime)) Reset();
 }
 
-CAirplaneObject::CAirplaneObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext, int nMeshes) : CGameObject(nMeshes) {
-
-	CMesh* pAirplaneMesh = new CAirplaneMeshDiffused(pd3dDevice, pd3dCommandList, 20.0f, 20.0f, 4.0f, XMFLOAT4(0.5f, 0.0f, 0.0f, 0.0f));
-
-	SetMesh(0, pAirplaneMesh);
-	CreateShaderVariables(pd3dDevice, pd3dCommandList);
-
-	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)pContext;
-	float fHeight = pTerrain->GetHeight(pTerrain->GetWidth() * 0.5f, pTerrain->GetLength() * 0.5f);
-	SetPosition(XMFLOAT3(pTerrain->GetWidth() * 0.5f, fHeight + 100.0f, pTerrain->GetLength() * 0.5f));
+CAirplaneObject::CAirplaneObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nMeshes) : CGameObject(nMeshes) {
 
 	//SetPlayerUpdatedContext(pTerrain);
 
@@ -469,12 +460,6 @@ CAirplaneObject::CAirplaneObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		m_ppBullets[i]->SetMovingSpeed(120.0f);
 		m_ppBullets[i]->SetActive(false);
 	}
-
-	CPlayerShader* pShader = new CPlayerShader();
-
-	pShader->CreateShader(pd3dDevice, pd3dGraphicsRootSignature);
-	SetShader(pShader);
-
 }
 
 CAirplaneObject::~CAirplaneObject()
