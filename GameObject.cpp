@@ -446,7 +446,6 @@ void CBulletObject::Animate(float fElapsedTime)
 
 CAirplaneObject::CAirplaneObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nMeshes) : CGameObject(nMeshes) 
 {
-	OnPrepareRender();
 	//SetPlayerUpdatedContext(pTerrain);
 
 	//SetCameraUpdatedContext(pTerrain);
@@ -474,8 +473,11 @@ void CAirplaneObject::OnPrepareRender() {
 	//비행기 모델을 그리기 전에 x-축으로 90도 회전한다. 
 
 	XMMATRIX mtxRotate = XMMatrixRotationRollPitchYaw(XMConvertToRadians(90.0f), 0.0f, 0.0f);
-	m_xmf4x4World = Matrix4x4::Multiply(mtxRotate, m_xmf4x4World);
-
+	static bool num{ false };
+	if (!num) {
+		m_xmf4x4World = Matrix4x4::Multiply(mtxRotate, m_xmf4x4World);
+		num = true;
+	}
 }
 
 void CAirplaneObject::OnUpdateTransform()
