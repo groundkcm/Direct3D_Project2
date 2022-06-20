@@ -21,17 +21,10 @@ CScene::~CScene()
 void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList) {
 
 		m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
-		//지형을 확대할 스케일 벡터이다. x-축과 z-축은 8배, y-축은 2배 확대한다.
 		XMFLOAT3 xmf3Scale(8.0f, 5.0f, 8.0f); XMFLOAT4 xmf4Color(0.0f, 0.2f, 0.0f, 0.0f);
 
-		//지형을 높이 맵 이미지 파일(HeightMap.raw)을 사용하여 생성한다. 높이 맵의 크기는 가로x세로(257x257)이다.
 
 #ifdef _WITH_TERRAIN_PARTITION 
-		/*
-		하나의 격자 메쉬의 크기는 가로x세로(17x17)이다.
-		지형 전체는 가로 방향으로 16개, 세로 방향으로 16의 격자 메 쉬를 가진다.
-		지형을 구성하는 격자 메쉬의 개수는 총 256(16x16)개가 된다.
-		*/
 		m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("./Model/Terrain/HeightMap.raw"), 257, 257, 17, 17, xmf3Scale, xmf4Color);
 #else
 		//지형을 하나의 격자 메쉬(257x257)로 생성한다. 
@@ -97,7 +90,6 @@ void CScene::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera
 
 
 
-/* 따라하기 7번 추가 */
 void CScene::ReleaseUploadBuffers() { 
 
 	for (int i = 0; i < m_nShaders; i++) 
@@ -171,10 +163,6 @@ CGameObject *CScene::PickObjectPointedByCursor(int xClient, int yClient, CCamera
 	XMFLOAT4X4 xmf4x4Projection = pCamera->GetProjectionMatrix();
 	D3D12_VIEWPORT d3dViewport = pCamera->GetViewport();
 	XMFLOAT3 xmf3PickPosition; 
-	/*
-		화면 좌표계의 점 (xClient, yClient)를 화면 좌표 변환의 역변환과 투영 변환의 역변환을 한다. 
-		그 결과는 카메라 좌표계의 점이다. 투영 평면이 카메라에서 z-축으로 거리가 1이므로 z-좌표는 1로 설정한다.
-	*/ 
 	xmf3PickPosition.x = (((2.0f * xClient) / d3dViewport.Width) - 1) / xmf4x4Projection._11;
 	xmf3PickPosition.y = -(((2.0f * yClient) / d3dViewport.Height) - 1) / xmf4x4Projection._22;
 	xmf3PickPosition.z = 1.0f;

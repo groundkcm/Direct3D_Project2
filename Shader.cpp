@@ -426,7 +426,7 @@ void CObjectsShader::AnimateObjects(float fTimeElapsed)
 		Collision();
 		CheckObjectByBulletCollisions();
 
-		a[j] += 0.0000001f;
+		a[j] += 0.000001f;
 
 		//---------------------------------------------------------------
 
