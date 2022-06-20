@@ -327,9 +327,6 @@ void CObjectsShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsComman
 	float zPosition = pTerrain->GetLength();
 	float xPos{}, yPos{}, zPos{};
 
-	
-	
-
 	m_nObjects = 10;
 	m_ppObjects = new CGameObject*[m_nObjects];
 	postemp.reserve(m_nObjects);
@@ -345,7 +342,9 @@ void CObjectsShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsComman
 		yPos = pTerrain->GetHeight(xPos, zPos);
 
 		airobject->SetMesh(0, pAirplaneMesh);
+		airobject->Rotate(90.0f, 0.0f, 0.0f);
 		airobject->SetPosition(xPos, yPos + 50.0f, zPos);
+		airobject->OnPrepareRender();
 
 		m_ppObjects[i] = airobject;
 		postemp.push_back(airobject->GetPosition());

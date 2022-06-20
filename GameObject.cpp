@@ -467,17 +467,18 @@ CAirplaneObject::~CAirplaneObject()
 	for (int i = 0; i < 50; i++) if (m_ppBullets[i]) delete m_ppBullets[i];
 }
 
-void CAirplaneObject::OnPrepareRender() {
+void CAirplaneObject::OnPrepareRender() 
+{
 
 	CGameObject::OnPrepareRender();
 	//비행기 모델을 그리기 전에 x-축으로 90도 회전한다. 
 
 	XMMATRIX mtxRotate = XMMatrixRotationRollPitchYaw(XMConvertToRadians(90.0f), 0.0f, 0.0f);
-	static bool num{ false };
-	if (!num) {
+	/*int cnt{};
+	if (!cnt) {
 		m_xmf4x4World = Matrix4x4::Multiply(mtxRotate, m_xmf4x4World);
-		num = true;
-	}
+		++cnt;
+	}*/
 }
 
 void CAirplaneObject::OnUpdateTransform()

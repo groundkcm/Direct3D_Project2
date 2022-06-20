@@ -179,9 +179,9 @@ public:
 	float						m_fBulletEffectiveRange = 150.0f;
 	CBulletObject* m_ppBullets[50];
 
-	virtual void OnUpdateTransform();
+	void OnUpdateTransform();
 	void FireBullet(CGameObject* pLockedObject);
 	
-	virtual void OnPrepareRender();
+	void OnPrepareRender();
 	//virtual void OnPlayerUpdateCallback(float fTimeElapsed);
 };
