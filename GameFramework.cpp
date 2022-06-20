@@ -480,8 +480,10 @@ void CGameFramework::Collision()
 		cnt = 1;
 	}
 	XMFLOAT3 temp = m_pPlayer->GetPosition();
-	if (temp.x <= -200.0f || temp.x >= 180.0f)
-		//m_pPlayer->SetPosition(XMFLOAT3(std::clamp(temp.x, -230.0f, 230.0f), temp.y, temp.z));
+	if (temp.x <= 50.0f || temp.x >= 2000.0f)
+		m_pPlayer->SetPosition(XMFLOAT3(std::clamp(temp.x, 20.0f, 2020.0f), temp.y, temp.z));
+	if (temp.z <= 50.0f || temp.z >= 2000.0f)
+		m_pPlayer->SetPosition(XMFLOAT3(temp.x, temp.y, std::clamp(temp.z, 20.0f, 2020.0f)));
 	
 	m_pPlayer->m_xmOOBB = BoundingOrientedBox(XMFLOAT3(m_pPlayer->GetPosition()), XMFLOAT3(20.0f, 20.0f, 4.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
 	m_pPlayer->m_pObjectCollided = NULL;
