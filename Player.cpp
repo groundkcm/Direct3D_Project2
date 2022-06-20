@@ -386,7 +386,7 @@ void CPlayer::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamer
 
 CAirplanePlayer::CAirplanePlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, void* pContext, int nMeshes) : CPlayer(nMeshes) 
 {
-	
+	OnPrepareRender();
 	CMesh *pAirplaneMesh = new CAirplaneMeshDiffused(pd3dDevice, pd3dCommandList, 20.0f, 20.0f, 4.0f, XMFLOAT4(0.5f, 0.0f, 0.0f, 0.0f));
 	
 	SetMesh(0, pAirplaneMesh); 
@@ -551,11 +551,12 @@ void CAirplanePlayer::FireBullet(CGameObject* pLockedObject)
 		}
 	}
 }
-
+CHeightMapTerrain* pMap;
 void CAirplanePlayer::OnPlayerUpdateCallback(float fTimeElapsed) {
 
 	XMFLOAT3 xmf3PlayerPosition = GetPosition();
 	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)m_pPlayerUpdatedContext;
+	pMap = pTerrain;
 	/*
 	지형에서 플레이어의 현재 위치 (x, z)의 지형 높이(y)를 구한다.
 	그리고 플레이어 메쉬의 높이가 12이고 플레이어의 중심이 직육면체의 가운데이므로 y 값에 메쉬의 높이의 절반을 더하면 플레이어의 위치가 된다.

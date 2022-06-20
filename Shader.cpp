@@ -319,12 +319,16 @@ std::uniform_int_distribution<int> uid{1, 10};
 std::uniform_real_distribution<float> urd{0.0f, 1.0f};
 
 std::vector<XMFLOAT3> postemp;
+extern CHeightMapTerrain* pMap;
 void CObjectsShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, void *pContext) 
 {
 	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)pContext;
 	float xPosition = pTerrain->GetWidth();
 	float zPosition = pTerrain->GetLength();
 	float xPos{}, yPos{}, zPos{};
+
+	
+	
 
 	m_nObjects = 10;
 	m_ppObjects = new CGameObject*[m_nObjects];
@@ -342,6 +346,7 @@ void CObjectsShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsComman
 
 		airobject->SetMesh(0, pAirplaneMesh);
 		airobject->SetPosition(xPos, yPos + 50.0f, zPos);
+
 		m_ppObjects[i] = airobject;
 		postemp.push_back(airobject->GetPosition());
 	}
@@ -418,6 +423,10 @@ void CObjectsShader::AnimateObjects(float fTimeElapsed)
 		ltemp = XMVectorLerp(vtemp, ptemp, a[j]);
 
 		m_ppObjects[j]->SetPosition(Vector3::XMVectorToFloat3(ltemp));
+
+		float fHeight = pMap->GetHeight(m_ppObjects[j]->GetPosition().x, m_ppObjects[j]->GetPosition().z) + 5.0f;
+		if (m_ppObjects[j]->GetPosition().y < fHeight) m_ppObjects[j]->SetPosition(m_ppObjects[j]->GetPosition().x, fHeight, m_ppObjects[j]->GetPosition().z);
+		
 		Collision();
 		CheckObjectByBulletCollisions();
 
