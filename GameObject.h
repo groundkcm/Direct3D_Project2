@@ -24,6 +24,8 @@ public:
 	float						m_fRotationSpeed = 0.0f;
 	CMesh						*m_pMesh = NULL;
 
+	bool						booster = false;
+
 	BoundingOrientedBox			m_xmOOBB = BoundingOrientedBox();
 	CGameObject					*m_pObjectCollided = NULL;
 	bool						m_pPlayerCollided = false;

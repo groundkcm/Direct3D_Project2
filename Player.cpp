@@ -453,7 +453,7 @@ CCamera *CAirplanePlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 		//플레이어의 특성을 1인칭 카메라 모드에 맞게 변경한다. 중력은 적용하지 않는다. 
 		SetFriction(200.0f);
 		SetGravity(XMFLOAT3(0.0f, 0.0f, 0.0f));
-		SetMaxVelocityXZ(125.0f);
+		SetMaxVelocityXZ(400.0f);
 		SetMaxVelocityY(400.0f); 
 
 		m_pCamera = OnChangeCamera(FIRST_PERSON_CAMERA, nCurrentCameraMode); 
@@ -483,7 +483,7 @@ CCamera *CAirplanePlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 		//플레이어의 특성을 3인칭 카메라 모드에 맞게 변경한다. 지연 효과와 카메라 오프셋을 설정한다.
 		SetFriction(250.0f); 
 		SetGravity(XMFLOAT3(0.0f, 0.0f, 0.0f)); 
-		SetMaxVelocityXZ(125.0f); 
+		SetMaxVelocityXZ(400.0f); 
 		SetMaxVelocityY(400.0f);
 		m_pCamera = OnChangeCamera(THIRD_PERSON_CAMERA, nCurrentCameraMode); 
 		

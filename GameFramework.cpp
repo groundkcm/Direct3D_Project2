@@ -3,9 +3,11 @@
 #include "Scene.h"
 #include "Player.h"
 #include <vector>
+#include <algorithm>
 
 
-CGameFramework::CGameFramework()	// O
+
+CGameFramework::CGameFramework()
 {
 
 	m_pdxgiFactory = NULL;
@@ -477,7 +479,10 @@ void CGameFramework::Collision()
 		v.push_back(m_pPlayer);
 		cnt = 1;
 	}
-
+	XMFLOAT3 temp = m_pPlayer->GetPosition();
+	if (temp.x <= -200.0f || temp.x >= 180.0f)
+		//m_pPlayer->SetPosition(XMFLOAT3(std::clamp(temp.x, -230.0f, 230.0f), temp.y, temp.z));
+	
 	m_pPlayer->m_xmOOBB = BoundingOrientedBox(XMFLOAT3(m_pPlayer->GetPosition()), XMFLOAT3(20.0f, 20.0f, 4.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
 	m_pPlayer->m_pObjectCollided = NULL;
 	v[0] = m_pPlayer;
@@ -508,7 +513,8 @@ void CGameFramework::ProcessInput()
 		if (pKeyBuffer['A'] & 0xF0) dwDirection |= DIR_LEFT; 
 		if (pKeyBuffer['D'] & 0xF0) dwDirection |= DIR_RIGHT; 
 		if (pKeyBuffer['Q'] & 0xF0) dwDirection |= DIR_UP;
-		if (pKeyBuffer['E'] & 0xF0) dwDirection |= DIR_DOWN; 
+		if (pKeyBuffer['E'] & 0xF0) dwDirection |= DIR_DOWN;
+		if (pKeyBuffer[VK_SPACE] & 0xF0) m_pPlayer->Move(dwDirection, 70.0f * m_GameTimer.GetTimeElapsed(), true);
 	} 
 	
 	float cxDelta = 0.0f, cyDelta = 0.0f; 
@@ -526,7 +532,7 @@ void CGameFramework::ProcessInput()
 		::SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y); 
 	} 
 	
-	if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f)) 
+	if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f))
 	{ 
 		if (m_pSelectedObject) 
 		{ 
@@ -547,6 +553,8 @@ void CGameFramework::ProcessInput()
 				m_pPlayer->Move(dwDirection, 50.0f * m_GameTimer.GetTimeElapsed(),true); 
 		} 
 	}
+	
+		
 		
 	m_pPlayer->Update(m_GameTimer.GetTimeElapsed());
 
@@ -680,7 +688,6 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 		case VK_ESCAPE:
 			::PostQuitMessage(0);
 			break;
-
 		case VK_RETURN:
 			break;
 		case VK_CONTROL:

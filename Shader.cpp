@@ -325,7 +325,7 @@ void CObjectsShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsComman
 	m_ppObjects = new CGameObject*[m_nObjects];
 	postemp.reserve(m_nObjects);
 
-	CAirplaneMeshDiffused *pAirplaneMesh = new CAirplaneMeshDiffused(pd3dDevice, pd3dCommandList, 20.0f, 20.0f, 4.0f, XMFLOAT4(0.5f, 0.0f, 0.5f, 0.0f));
+	CAirplaneMeshDiffused *pAirplaneMesh = new CAirplaneMeshDiffused(pd3dDevice, pd3dCommandList, 20.0f, 20.0f, 4.0f, XMFLOAT4(0.5f, 0.5f, 0.0f, 0.0f));
 	CAirplaneObject* airobject = NULL;
 
 	airobject = new CAirplaneObject(pd3dDevice, pd3dCommandList, 1);
