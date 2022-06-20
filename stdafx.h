@@ -1,15 +1,9 @@
-// stdafx.h : 자주 사용하지만 자주 변경되지는 않는
-// 표준 시스템 포함 파일 또는 프로젝트 관련 포함 파일이
-// 들어 있는 포함 파일입니다.
-//
-/* stdafx.h에 header를 추가하는 이유 */
-/* PCH( PreCompiled Header ) 를 통하여 자주 변경하지 않는  */
-/* 헤더 파일에 대한 컴파일을 매번하지 않아도 되는 기능을 제공하기 때문 */
+
 #pragma once
 
 #include "targetver.h"
 
-#define WIN32_LEAN_AND_MEAN             // 거의 사용되지 않는 내용은 Windows 헤더에서 제외합니다.
+#define WIN32_LEAN_AND_MEAN            
 // Windows 헤더 파일:
 #include <windows.h>
 

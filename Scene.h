@@ -39,11 +39,6 @@ protected:
 	CObjectsShader *m_pShaders = NULL;
 	int m_nShaders = 0;
 
-	/* 루트 시그니쳐를 나타내는 인터페이스 포인터 * /
-
-	/* 루트 시그니쳐란 ? */
-	/* 어떤 리소스(데이터)들이 그래픽스 파이프라인에 연결되는 가를 정의 */
-	/* 그래픽 루트 시그니쳐, 계산 루트 시그니쳐가 있는데 우리는 그래픽 루트 시그니쳐를 이용 */
 
 	ID3D12RootSignature *m_pd3dGraphicsRootSignature = NULL;
 

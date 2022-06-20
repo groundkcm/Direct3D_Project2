@@ -20,10 +20,6 @@ public:
 
 private:
 
-	/* Performance Counter */
-	/* 카운터 데이터는 시스템 병목 현상을 파악하고 시스템 및 응용프로그램 성능을 세부적으로 조정 */
-	/* 운영 체제, 네트워크 및 장치는 응용 프로그램에서 소비 할 수 있는 카운터 데이터를 제공 */
-	/* 시스템의 성능을 그래픽으로 보여준다. */
 
 	bool			m_bHardwareHasPerformanceCounter;	// 컴퓨터가 Performance Counter를 갖고 있는가?
 	bool			m_bStopped;
