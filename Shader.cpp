@@ -5,6 +5,7 @@
 #include "Mesh.h"
 #include "Player.h"
 #include <vector>
+#include <random>
 
 
 CShader::~CShader() 
@@ -312,6 +313,10 @@ void CObjectsShader::CreateShader(ID3D12Device *pd3dDevice, ID3D12RootSignature 
 	CShader::CreateShader(pd3dDevice, pd3dGraphicsRootSignature);
 
 }
+std::random_device rd;
+std::default_random_engine dre(rd());
+std::uniform_int_distribution<int> uid{1, 10};
+std::uniform_real_distribution<float> urd{0.0f, 1.0f};
 
 std::vector<XMFLOAT3> postemp;
 void CObjectsShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, void *pContext) 
@@ -321,23 +326,25 @@ void CObjectsShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsComman
 	float zPosition = pTerrain->GetLength();
 	float xPos{}, yPos{}, zPos{};
 
-	m_nObjects = 1;
+	m_nObjects = 10;
 	m_ppObjects = new CGameObject*[m_nObjects];
 	postemp.reserve(m_nObjects);
 
-	CAirplaneMeshDiffused *pAirplaneMesh = new CAirplaneMeshDiffused(pd3dDevice, pd3dCommandList, 20.0f, 20.0f, 4.0f, XMFLOAT4(0.5f, 0.5f, 0.0f, 0.0f));
 	CAirplaneObject* airobject = NULL;
 
-	airobject = new CAirplaneObject(pd3dDevice, pd3dCommandList, 1);
-	xPos = xPosition / 2;
-	zPos = xPosition / 3;
-	yPos = pTerrain->GetHeight(xPos, zPos);
+	for (int i{}; i < m_nObjects; ++i) {
+		CAirplaneMeshDiffused* pAirplaneMesh = new CAirplaneMeshDiffused(pd3dDevice, pd3dCommandList, 20.0f, 20.0f, 4.0f, XMFLOAT4(urd(dre), urd(dre), urd(dre), 0.0f));
 
-	airobject->SetMesh(0, pAirplaneMesh);
-	airobject->SetPosition(xPos, yPos + 50.0f, zPos);
-	m_ppObjects[0] = airobject;
-	postemp.push_back(airobject->GetPosition());
-	
+		airobject = new CAirplaneObject(pd3dDevice, pd3dCommandList, 1);
+		xPos = xPosition / uid(dre);
+		zPos = xPosition / uid(dre);
+		yPos = pTerrain->GetHeight(xPos, zPos);
+
+		airobject->SetMesh(0, pAirplaneMesh);
+		airobject->SetPosition(xPos, yPos + 50.0f, zPos);
+		m_ppObjects[i] = airobject;
+		postemp.push_back(airobject->GetPosition());
+	}
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 }
